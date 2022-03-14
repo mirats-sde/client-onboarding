@@ -1,0 +1,32 @@
+.progress {
+	background-color: #d8d8d8;
+	border-radius: 20px;
+	position: relative;
+	margin-top: 8px;
+	margin-bottom: 40px;
+	height: 8px;
+}
+
+.progress_done {
+	/* background: linear-gradient(to left, #7B61FF, #9457EB); */
+	background: linear-gradient(to right, #7B61FF, #beb5d9);
+	box-shadow: 0 3px 3px -5px #beb5d9, 0 2px 5px #7B61FF;
+	border-radius: 20px;
+	color: #fff;
+	height: 100%;
+	width: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	opacity: 0;
+	transition: 1s ease 0.3s;
+}
+
+/* .progress_done::after {
+	content: "";
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	background-color: #7B61FF;
+	position: absolute;
+} */
