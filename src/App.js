@@ -34,10 +34,10 @@ function App() {
       <Switch>
         {/* <Route path="/page/:id">
           <BlogPost />
-        </Route>
+        </Route> */}
         <Route path="/">
           <Home />
-        </Route> */}
+        </Route>
         <Route path="/client-onboarding/:id/:sid">
           <ClientOnboarding />
         </Route>
