@@ -42,7 +42,7 @@ const VendorBusinessInfo = () => {
 
   //vendor_entityInfo:
   useEffect(() => {
-    console.log(vendor_businessInfo);
+    // console.log(vendor_businessInfo);
   }, [vendor_businessInfo]);
 
   //first id:
@@ -54,17 +54,17 @@ const VendorBusinessInfo = () => {
   const Hashids = require("hashids/cjs");
   const hashids = new Hashids("client-vendor");
   let decode_id = hashids.decode(id);
-  console.log("decoded id=>", decode_id);
+  // console.log("decoded id=>", decode_id);
   let decode_sid = hashids.decode(sid);
-  console.log("decoded sid=>", decode_sid);
+  // console.log("decoded sid=>", decode_sid);
 
   //check whether first id exists or not:
   async function checkID(id, sid) {
     const Hashids = require("hashids/cjs");
     const hashids = new Hashids("client-vendor");
 
-    console.log(decode_id[0]);
-    console.log(decode_sid[0]);
+    // console.log(decode_id[0]);
+    // console.log(decode_sid[0]);
     const q = query(
       collection(db, "supply_partners"),
       where("id", "==", decode_id[0]),
@@ -79,15 +79,15 @@ const VendorBusinessInfo = () => {
   }
 
   useEffect(() => {
-    console.log("in main useEffect");
+    // console.log("in main useEffect");
     checkID(id, sid);
   }, []);
 
   useEffect(() => {
     if (flag) {
-      console.log("id found");
+      // console.log("id found");
     } else {
-      console.log("id not found");
+      // console.log("id not found");
     }
   }, [flag]);
 
@@ -104,11 +104,11 @@ const VendorBusinessInfo = () => {
       }
     )
       .then(() => {
-        console.log("data uploaded successfully!!!");
+        // console.log("data uploaded successfully!!!");
         history.push(`/vendor-documents-links/${id}/${sid}`);
       })
       .catch((er) => {
-        console.log("Error", er);
+        // console.log("Error", er);
       });
   }
 

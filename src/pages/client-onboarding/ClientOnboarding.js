@@ -75,7 +75,7 @@ const ClientOnboarding = () => {
   const tax_id_certi_Ref = useRef();
 
   useEffect(() => {
-    console.log(entityInfo);
+    // console.log(entityInfo);
   }, [entityInfo]);
 
   //tax certificate file upload:
@@ -93,9 +93,9 @@ const ClientOnboarding = () => {
   const Hashids = require("hashids/cjs");
   const hashids = new Hashids("client-vendor");
   let decode_id = hashids.decode(id);
-  console.log("decoded id=> ", decode_id);
+  // console.log("decoded id=> ", decode_id);
   let decode_sid = hashids.decode(sid);
-  console.log("decoded sid=> ", decode_sid);
+  // console.log("decoded sid=> ", decode_sid);
 
   // let decod = hashids.encode(id);
   // console.log(decod);
@@ -108,8 +108,8 @@ const ClientOnboarding = () => {
     const Hashids = require("hashids/cjs");
     const hashids = new Hashids("client-vendor");
 
-    console.log(decode_id[0]);
-    console.log(decode_sid[0]);
+    // console.log(decode_id[0]);
+    // console.log(decode_sid[0]);
     const q = query(
       collection(db, "Organisation"),
       where("id", "==", decode_id[0]),
@@ -129,7 +129,7 @@ const ClientOnboarding = () => {
 
   //deleting file from storage:
   const deleteFileFromStorage = (storageRef) => {
-    console.log("deleting file");
+    // console.log("deleting file");
     listAll(storageRef).then((res) => {
       console.log(res.items);
       res.items.forEach((itemRef) => {
@@ -137,11 +137,11 @@ const ClientOnboarding = () => {
         deleteObject(itemRef)
           .then(() => {
             //file deleted successfullly
-            console.log("file deleted successfully", itemRef);
+            // console.log("file deleted successfully", itemRef);
             setShowProgress(false);
           })
           .catch((error) => {
-            console.log(error);
+            // console.log(error);
           });
       });
     });
@@ -150,10 +150,10 @@ const ClientOnboarding = () => {
   //uploading tax certificate file
   const UploadFiles = (id, file) => {
     if (!file) {
-      console.log("tax certificate file not found!");
+      // console.log("tax certificate file not found!");
       return;
     } else {
-      console.log("file found");
+      // console.log("file found");
       let filename = file.name;
       const fileref = ref(
         storage,
@@ -166,14 +166,14 @@ const ClientOnboarding = () => {
           const progress = Math.round(
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100
           );
-          console.log("progress bar is: ", progress);
+          // console.log("progress bar is: ", progress);
         },
         (er) => {
-          console.log("error while uploading file", er.message);
+          // console.log("error while uploading file", er.message);
         },
         () => {
           getDownloadURL(uploadtask.snapshot.ref).then((url) => {
-            console.log(url);
+            // console.log(url);
           });
         }
       );
@@ -197,7 +197,7 @@ const ClientOnboarding = () => {
   }
 
   useEffect(() => {
-    console.log("in useeffect", id);
+    // console.log("in useeffect", id);
     checkID(id, sid);
     // const storageRef = ref(storage, `/legal_entity/${decode_id[0]}`);
     ListTaxFiles();
@@ -205,9 +205,9 @@ const ClientOnboarding = () => {
 
   useEffect(() => {
     if (flag) {
-      console.log("id found");
+      // console.log("id found");
     } else {
-      console.log("id not found");
+      // console.log("id not found");
     }
   }, [flag]);
 
@@ -222,16 +222,16 @@ const ClientOnboarding = () => {
       merge: true,
     })
       .then(() => {
-        console.log("data uploaded successfully");
+        // console.log("data uploaded successfully");
         history.push(`/business-info/${id}/${sid}`);
       })
       .catch((er) => {
-        console.log("Error", er);
+        // console.log("Error", er);
       });
   }
 
   useEffect(() => {
-    console.log(entityInfo?.legal_entity?.start_date);
+    // console.log(entityInfo?.legal_entity?.start_date);
   }, [entityInfo?.legal_entity?.start_date]);
 
   return (

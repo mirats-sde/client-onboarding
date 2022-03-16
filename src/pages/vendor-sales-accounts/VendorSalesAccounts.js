@@ -51,8 +51,8 @@ const SalesInfo = ({
 
   //salesInfo:
   useEffect(() => {
-    console.log("in useEffect for sales info");
-    console.log(vendor_SalesAccountsInfo);
+    // console.log("in useEffect for sales info");
+    // console.log(vendor_SalesAccountsInfo);
     // console.log(phoneNumber);
   }, [vendor_SalesAccountsInfo]);
 
@@ -69,7 +69,7 @@ const SalesInfo = ({
   const hashids = new Hashids("client-vendor");
 
   let decode_sid = hashids.decode(sid);
-  console.log("decoded sid=> ", decode_sid);
+  // console.log("decoded sid=> ", decode_sid);
 
   //check whether first id exists or not
   async function checkID(id, sid) {
@@ -94,15 +94,15 @@ const SalesInfo = ({
   }
 
   useEffect(() => {
-    console.log("in useEffect", id);
+    // console.log("in useEffect", id);
     checkID(id, sid);
   }, [id]);
 
   useEffect(() => {
     if (flag) {
-      console.log("id found");
+      // console.log("id found");
     } else {
-      console.log("id not found");
+      // console.log("id not found");
     }
   }, [flag]);
 
@@ -236,8 +236,8 @@ const AccountsInfo = ({
   const [phoneNumber, setPhoneNumber] = useState("");
   //accounts Info:
   useEffect(() => {
-    console.log("in useEffect for accounts info");
-    console.log(vendor_SalesAccountsInfo);
+    // console.log("in useEffect for accounts info");
+    // console.log(vendor_SalesAccountsInfo);
   }, [vendor_SalesAccountsInfo]);
 
   //first id
@@ -251,7 +251,7 @@ const AccountsInfo = ({
   const Hashids = require("hashids/cjs");
   const hashids = new Hashids("client-vendor");
   let decode_sid = hashids.decode(sid);
-  console.log("decoded sid=> ", decode_sid);
+  // console.log("decoded sid=> ", decode_sid);
 
   // let decod = hashids.encode(id);
   // console.log(decod);
@@ -282,15 +282,15 @@ const AccountsInfo = ({
   }
 
   useEffect(() => {
-    console.log("in useEffect", id);
+    // console.log("in useEffect", id);
     checkID(id, sid);
   }, [id]);
 
   useEffect(() => {
     if (flag) {
-      console.log("id found");
+      // console.log("id found");
     } else {
-      console.log("id not found");
+      // console.log("id not found");
     }
   }, [flag]);
 
@@ -448,11 +448,11 @@ const VendorSalesAccountsInfo = () => {
       }
     )
       .then(() => {
-        console.log("data updated successfully");
+        // console.log("data updated successfully");
         // history.push(``)
       })
       .catch((er) => {
-        console.log("error", er);
+        // console.log("error", er);
       });
   }
   return (

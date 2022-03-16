@@ -64,7 +64,7 @@ const VendorOnboarding = () => {
 
   //vendor_entityInfo:
   useEffect(() => {
-    console.log(vendor_entityInfo);
+    // console.log(vendor_entityInfo);
   }, [vendor_entityInfo]);
 
   //first id:
@@ -76,9 +76,9 @@ const VendorOnboarding = () => {
   const Hashids = require("hashids/cjs");
   const hashids = new Hashids("client-vendor");
   let decode_id = hashids.decode(id);
-  console.log("decoded id=>", decode_id);
+  // console.log("decoded id=>", decode_id);
   let decode_sid = hashids.decode(sid);
-  console.log("decoded sid=>", decode_sid);
+  // console.log("decoded sid=>", decode_sid);
 
   // let decod = hashids.encode(id);
   // console.log(decod);
@@ -88,18 +88,18 @@ const VendorOnboarding = () => {
 
   //deleting file from storage:
   const deleteFileFromStorage = (storageRef) => {
-    console.log("deleting file");
+    // console.log("deleting file");
     listAll(storageRef).then((res) => {
-      console.log(res.items);
+      // console.log(res.items);
       res.items.forEach((itemRef) => {
         setShowProgress(true);
         deleteObject(itemRef)
           .then(() => {
-            console.log("file deleted successfully", itemRef);
+            // console.log("file deleted successfully", itemRef);
             setShowProgress(false);
           })
           .catch((error) => {
-            console.log(error);
+            // console.log(error);
           });
       });
     });
@@ -108,10 +108,10 @@ const VendorOnboarding = () => {
   //uploading tax certificate file:
   const UploadFiles = (id, file) => {
     if (!file) {
-      console.log("tax id certificate file not found");
+      // console.log("tax id certificate file not found");
       return;
     } else {
-      console.log("file found");
+      // console.log("file found");
       let filename = file.name;
       const fileref = ref(
         storage,
@@ -124,14 +124,14 @@ const VendorOnboarding = () => {
           const progress = Math.round(
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100
           );
-          console.log("progress bar is : ", progress);
+          // console.log("progress bar is : ", progress);
         },
         (er) => {
-          console.log("error while uploading file: ", er.message);
+          // console.log("error while uploading file: ", er.message);
         },
         () => {
           getDownloadURL(uploadtask.snapshot.ref).then((url) => {
-            console.log(url);
+            // console.log(url);
           });
         }
       );
@@ -159,8 +159,8 @@ const VendorOnboarding = () => {
     const Hashids = require("hashids/cjs");
     const hashids = new Hashids("client-vendor");
 
-    console.log(decode_id[0]);
-    console.log(decode_sid[0]);
+    // console.log(decode_id[0]);
+    // console.log(decode_sid[0]);
     const q = query(
       collection(db, "supply_partners"),
       where("id", "==", decode_id[0]),
@@ -181,16 +181,16 @@ const VendorOnboarding = () => {
   );
 
   useEffect(() => {
-    console.log("in main useEffect");
+    // console.log("in main useEffect");
     checkID(id, sid);
     ListTaxFiles();
   }, []);
 
   useEffect(() => {
     if (flag) {
-      console.log("id found");
+      // console.log("id found");
     } else {
-      console.log("id not found");
+      // console.log("id not found");
     }
   }, [flag]);
 
@@ -212,11 +212,11 @@ const VendorOnboarding = () => {
       }
     )
       .then(() => {
-        console.log("data uploaded successfully!!!");
+        // console.log("data uploaded successfully!!!");
         history.push(`/vendor-business-info/${id}/${sid}`);
       })
       .catch((er) => {
-        console.log("Error", er);
+        // console.log("Error", er);
       });
   }
 

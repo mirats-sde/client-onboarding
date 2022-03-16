@@ -48,8 +48,8 @@ const SalesInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
 
   //salesInfo:
   useEffect(() => {
-    console.log("in useEffect for sales info");
-    console.log(SalesAccountsInfo);
+    // console.log("in useEffect for sales info");
+    // console.log(SalesAccountsInfo);
     // console.log(phoneNumber);
   }, [SalesAccountsInfo]);
 
@@ -66,7 +66,7 @@ const SalesInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
   const hashids = new Hashids("client-vendor");
 
   let decode_sid = hashids.decode(sid);
-  console.log("decoded sid=> ", decode_sid);
+  // console.log("decoded sid=> ", decode_sid);
 
   // let decod = hashids.encode(id);
   // console.log(decod);
@@ -97,15 +97,15 @@ const SalesInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
   }
 
   useEffect(() => {
-    console.log("in useEffect", id);
+    // console.log("in useEffect", id);
     checkID(id, sid);
   }, [id]);
 
   useEffect(() => {
     if (flag) {
-      console.log("id found");
+      // console.log("id found");
     } else {
-      console.log("id not found");
+      // console.log("id not found");
     }
   }, [flag]);
 
@@ -248,8 +248,8 @@ const AccountsInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
 
   //accounts Info:
   useEffect(() => {
-    console.log("in useEffect for accounts info");
-    console.log(SalesAccountsInfo);
+    // console.log("in useEffect for accounts info");
+    // console.log(SalesAccountsInfo);
   }, [SalesAccountsInfo]);
 
   //first id
@@ -263,7 +263,7 @@ const AccountsInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
   const Hashids = require("hashids/cjs");
   const hashids = new Hashids("client-vendor");
   let decode_sid = hashids.decode(sid);
-  console.log("decoded sid=> ", decode_sid);
+  // console.log("decoded sid=> ", decode_sid);
 
   // let decod = hashids.encode(id);
   // console.log(decod);
@@ -294,15 +294,15 @@ const AccountsInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
   }
 
   useEffect(() => {
-    console.log("in useEffect", id);
+    // console.log("in useEffect", id);
     checkID(id, sid);
   }, [id]);
 
   useEffect(() => {
     if (flag) {
-      console.log("id found");
+      // console.log("id found");
     } else {
-      console.log("id not found");
+      // console.log("id not found");
     }
   }, [flag]);
 
@@ -457,11 +457,11 @@ const SalesAccountsInfo = () => {
       merge: true,
     })
       .then(() => {
-        console.log("data updated successfully");
+        // console.log("data updated successfully");
         history.push(`/vendor-onboarding/${id}/${sid}`);
       })
       .catch((er) => {
-        console.log("error", er);
+        // console.log("error", er);
       });
   }
   return (

@@ -51,7 +51,7 @@ const BusinessInfo = () => {
 
   //business info:
   useEffect(() => {
-    console.log(businessInfo);
+    // console.log(businessInfo);
   }, [businessInfo]);
 
   //first id:
@@ -64,26 +64,26 @@ const BusinessInfo = () => {
 
   const Hashids = require("hashids/cjs");
   const hashids = new Hashids("client-vendor");
-  console.log(id);
-  console.log(sid);
+  // console.log(id);
+  // console.log(sid);
   let decode_id = hashids.decode(id);
-  console.log("decoded id=>", decode_id);
+  // console.log("decoded id=>", decode_id);
   let decode_sid = hashids.decode(sid);
-  console.log("decoded sid=>", decode_sid);
+  // console.log("decoded sid=>", decode_sid);
 
   let decod = hashids.encode(id);
-  console.log(decod);
+  // console.log(decod);
 
   let decodeid = hashids.encode(sid);
-  console.log(decodeid);
+  // console.log(decodeid);
 
   //check whether the id exists or not:
   async function checkID(id, sid) {
     const Hashids = require("hashids/cjs");
     const hashids = new Hashids("client-vendor");
 
-    console.log(decode_id[0]);
-    console.log(decode_sid[0]);
+    // console.log(decode_id[0]);
+    // console.log(decode_sid[0]);
     const q = query(
       collection(db, "Organisation"),
       where("id", "==", decode_id[0]),
@@ -98,15 +98,15 @@ const BusinessInfo = () => {
   }
 
   useEffect(() => {
-    console.log("in use effect", id);
+    // console.log("in use effect", id);
     checkID(id, sid);
   }, []);
 
   useEffect(() => {
     if (flag) {
-      console.log("id found");
+      // console.log("id found");
     } else {
-      console.log("id not found");
+      // console.log("id not found");
     }
   }, [flag]);
 
@@ -119,11 +119,11 @@ const BusinessInfo = () => {
       merge: true,
     })
       .then(() => {
-        console.log("data updated successfully");
+        // console.log("data updated successfully");
         history.push(`/documents-links/${id}/${sid}`);
       })
       .catch((er) => {
-        console.log("error", er);
+        // console.log("error", er);
       });
   }
 

@@ -73,7 +73,7 @@ const VendorDocumentsLinks = () => {
 
   //document
   useEffect(() => {
-    console.log(vendor_documentsInfo);
+    // console.log(vendor_documentsInfo);
   }, [vendor_documentsInfo]);
 
   //first id:
@@ -86,12 +86,12 @@ const VendorDocumentsLinks = () => {
 
   const Hashids = require("hashids/cjs");
   const hashids = new Hashids("client-vendor");
-  console.log(id);
-  console.log(sid);
+  // console.log(id);
+  // console.log(sid);
   let decode_id = hashids.decode(id);
-  console.log("decoded id=>", decode_id);
+  // console.log("decoded id=>", decode_id);
   let decode_sid = hashids.decode(sid);
-  console.log("decoded sid=>", decode_sid);
+  // console.log("decoded sid=>", decode_sid);
 
   //panel book reference:
   const panelBookRef = ref(
@@ -109,8 +109,8 @@ const VendorDocumentsLinks = () => {
   async function checkID(id, sid) {
     const Hashids = require("hashids/cjs");
     const hashids = new Hashids("client-vendor");
-    console.log(decode_id[0]);
-    console.log(decode_sid[0]);
+    // console.log(decode_id[0]);
+    // console.log(decode_sid[0]);
     const q = query(
       collection(db, "supply_partners"),
       where("id", "==", decode_id[0]),
@@ -125,22 +125,22 @@ const VendorDocumentsLinks = () => {
   }
 
   const DeletePanelFileFromStorage = (storageRef) => {
-    console.log("Deleting file");
+    // console.log("Deleting file");
     listAll(storageRef).then((res) => {
       // console
-      console.log(res.items);
+      // console.log(res.items);
       res.items.forEach((itemRef) => {
         setShowPanelProgress(true);
         // All the items under listRef.
         deleteObject(itemRef)
           .then(() => {
             // File deleted successfully
-            console.log("file deleted successfully", itemRef);
+            // console.log("file deleted successfully", itemRef);
             setShowPanelProgress(false);
             // setPanelBookFiles();
           })
           .catch((error) => {
-            console.log(error);
+            // console.log(error);
             // Uh-oh, an error occurred!
           });
       });
@@ -148,22 +148,22 @@ const VendorDocumentsLinks = () => {
   };
 
   const DeleteESOMARFileFromStorage = (storageRef) => {
-    console.log("Deleting file");
+    // console.log("Deleting file");
     listAll(storageRef).then((res) => {
       // console
-      console.log(res.items);
+      // console.log(res.items);
       res.items.forEach((itemRef) => {
         setshowESOMARProgress(true);
         // All the items under listRef.
         deleteObject(itemRef)
           .then(() => {
             // File deleted successfully
-            console.log("file deleted successfully", itemRef);
+            // console.log("file deleted successfully", itemRef);
             setshowESOMARProgress(false);
             // setPanelBookFiles();
           })
           .catch((error) => {
-            console.log(error);
+            // console.log(error);
             // Uh-oh, an error occurred!
           });
       });
@@ -172,12 +172,12 @@ const VendorDocumentsLinks = () => {
 
   const UploadPanelBookFiles = (id, panelfile) => {
     if (!panelfile) {
-      console.log("panel book file not found");
+      // console.log("panel book file not found");
       return;
     }
     //Empty file
     else {
-      console.log("file found");
+      // console.log("file found");
       let panelfilename = panelfile.name;
       // If File extension is zip then only proceed
       const panelfileref = ref(
@@ -192,14 +192,14 @@ const VendorDocumentsLinks = () => {
           const progress = Math.round(
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100
           );
-          console.log("PRogress bar is ", progress);
+          // console.log("PRogress bar is ", progress);
         },
         (er) => {
-          console.log("Error while uploading file ", er.message);
+          // console.log("Error while uploading file ", er.message);
         },
         () => {
           getDownloadURL(paneluploadTask.snapshot.ref).then((url) => {
-            console.log(url);
+            // console.log(url);
           });
         }
       );
@@ -209,10 +209,10 @@ const VendorDocumentsLinks = () => {
   //esomar file upload
   const UploadESOMARFiles = (id, esomarfile) => {
     if (!esomarfile) {
-      console.log("esomar file not found");
+      // console.log("esomar file not found");
       return;
     } else {
-      console.log("esomar file found");
+      // console.log("esomar file found");
       let esomarfilename = esomarfile.name;
       const esomarfileref = ref(
         storage,
@@ -225,14 +225,14 @@ const VendorDocumentsLinks = () => {
           const progress = Math.round(
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100
           );
-          console.log("progress bar is: ", progress);
+          // console.log("progress bar is: ", progress);
         },
         (er) => {
-          console.log("Error while uploading file=> ", er.message);
+          // console.log("Error while uploading file=> ", er.message);
         },
         () => {
           getDownloadURL(esomaruploadtask.snapshot.ref).then((url) => {
-            console.log(url);
+            // console.log(url);
           });
         }
       );
@@ -254,8 +254,8 @@ const VendorDocumentsLinks = () => {
     });
   }
 
-  console.log(panelFile);
-  console.log(esomarFile);
+  // console.log(panelFile);
+  // console.log(esomarFile);
 
   function ListPanelBookDocument() {
     listAll(panelBookRef).then((res) => {
@@ -273,7 +273,7 @@ const VendorDocumentsLinks = () => {
   }
 
   useEffect(() => {
-    console.log(" in use effect", id);
+    // console.log(" in use effect", id);
     checkID(id, sid);
 
     //For Panel book
@@ -283,9 +283,9 @@ const VendorDocumentsLinks = () => {
 
   useEffect(() => {
     if (flag) {
-      console.log("id found");
+      // console.log("id found");
     } else {
-      console.log("id not found");
+      // console.log("id not found");
     }
   }, [flag]);
 
@@ -310,11 +310,11 @@ const VendorDocumentsLinks = () => {
       }
     )
       .then(() => {
-        console.log("data updated successfully");
+        // console.log("data updated successfully");
         history.push(`/vendor-sales-accounts/${id}/${sid}`);
       })
       .catch((er) => {
-        console.log("error", er);
+        // console.log("error", er);
       });
   }
 
