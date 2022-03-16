@@ -23,6 +23,7 @@ import {
 } from "firebase/firestore";
 import { decode } from "@firebase/util";
 import { connectStorageEmulator } from "firebase/storage";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 const helperCardData = [
   {
@@ -153,6 +154,7 @@ const SalesInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
                       },
                     });
                   }}
+                  required
                 />
               </div>
             </div>
@@ -172,7 +174,7 @@ const SalesInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
                     autoFocus: true,
                   }}
                   country={"in"}
-                  value={phoneNumber}
+                  // value={phoneNumber}
                   value={SalesAccountsInfo?.SalesAccounts_Info?.sales_mobileno}
                   onChange={(e) => {
                     setSalesAccountsInfo({
@@ -229,6 +231,7 @@ const SalesInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
                       },
                     });
                   }}
+                  required
                 />
               </div>
             </div>
@@ -348,6 +351,7 @@ const AccountsInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
                       },
                     });
                   }}
+                  required
                 />
               </div>
             </div>
@@ -417,6 +421,7 @@ const AccountsInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
                       },
                     });
                   }}
+                  required
                 />
               </div>
             </div>
@@ -428,6 +433,7 @@ const AccountsInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
 };
 
 const SalesAccountsInfo = () => {
+  const history = useHistory();
   // const [salesInfo, setsalesInfo] = useState();
   const [SalesAccountsInfo, setSalesAccountsInfo] = useState();
   const [decode_id, setdecode_id] = useState();
@@ -452,6 +458,7 @@ const SalesAccountsInfo = () => {
     })
       .then(() => {
         console.log("data updated successfully");
+        history.push(`/vendor-onboarding/${id}/${sid}`);
       })
       .catch((er) => {
         console.log("error", er);
@@ -482,11 +489,11 @@ const SalesAccountsInfo = () => {
         />
 
         <div className={styles.next}>
-          <Link to="/vendor-onboarding">
-            <button className={styles.btnNext} onClick={handleFormSubmit}>
-              NEXT
-            </button>
-          </Link>
+          {/* <Link to="/vendor-onboarding"> */}
+          <button className={styles.btnNext} onClick={handleFormSubmit}>
+            NEXT
+          </button>
+          {/* </Link> */}
         </div>
       </div>
     </>

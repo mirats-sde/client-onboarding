@@ -4,10 +4,26 @@ import InputHelperCard from "../../components/input-helper-card/InputHelperCard"
 import ProgressBar from "../../components/progress-bar/ProgressBar";
 import compact from "../../assets/compact.png";
 import data from "../../assets/data.png";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { db } from "../../firebase-config";
+import {
+  collection,
+  getDocs,
+  getDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  query,
+  where,
+  setDoc,
+} from "firebase/firestore";
+import { decode } from "@firebase/util";
+import { connectStorageEmulator } from "firebase/storage";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 const helperCardData = [
   {
@@ -27,8 +43,69 @@ const helperCardDataAccounts = [
   },
 ];
 
-const SalesInfo = () => {
+const SalesInfo = ({
+  vendor_SalesAccountsInfo,
+  setvendor_SalesAccountsInfo,
+}) => {
   const [phoneNumber, setPhoneNumber] = useState("");
+
+  //salesInfo:
+  useEffect(() => {
+    console.log("in useEffect for sales info");
+    console.log(vendor_SalesAccountsInfo);
+    // console.log(phoneNumber);
+  }, [vendor_SalesAccountsInfo]);
+
+  //first id
+  const { id } = useParams();
+  // const { id, sid } = useParams(id, sid);
+
+  //second id
+  const { sid } = useParams();
+
+  let [flag, setFlag] = useState(false);
+
+  const Hashids = require("hashids/cjs");
+  const hashids = new Hashids("client-vendor");
+
+  let decode_sid = hashids.decode(sid);
+  console.log("decoded sid=> ", decode_sid);
+
+  //check whether first id exists or not
+  async function checkID(id, sid) {
+    const Hashids = require("hashids/cjs");
+    const hashids = new Hashids("client-vendor");
+
+    let d_fid = hashids.decode(id);
+    let d_sid = hashids.decode(sid);
+
+    const q = query(
+      collection(db, "supply_partners"),
+      where("id", "==", d_fid[0]),
+      where("sid", "==", d_sid[0])
+    );
+
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.docs.length !== 0) {
+      // console.log("Entered this condition")
+      setFlag(true);
+      setvendor_SalesAccountsInfo(querySnapshot.docs[0].data());
+    }
+  }
+
+  useEffect(() => {
+    console.log("in useEffect", id);
+    checkID(id, sid);
+  }, [id]);
+
+  useEffect(() => {
+    if (flag) {
+      console.log("id found");
+    } else {
+      console.log("id not found");
+    }
+  }, [flag]);
+
   return (
     <section className={styles.text_form}>
       <div className={styles.left_text}>
@@ -60,6 +137,19 @@ const SalesInfo = () => {
                   type="text"
                   placeholder="Global Media.Sales"
                   className={styles.input}
+                  value={
+                    vendor_SalesAccountsInfo?.SalesAccounts_Info
+                      ?.sales_contactName
+                  }
+                  onChange={(e) => {
+                    setvendor_SalesAccountsInfo({
+                      ...vendor_SalesAccountsInfo,
+                      SalesAccounts_Info: {
+                        ...vendor_SalesAccountsInfo?.SalesAccounts_Info,
+                        sales_contactName: e.target.value,
+                      },
+                    });
+                  }}
                 />
               </div>
             </div>
@@ -79,9 +169,17 @@ const SalesInfo = () => {
                     autoFocus: true,
                   }}
                   country={"in"}
-                  value={phoneNumber}
+                  value={
+                    vendor_SalesAccountsInfo?.SalesAccounts_Info?.sales_mobileno
+                  }
                   onChange={(e) => {
-                    setPhoneNumber(e);
+                    setvendor_SalesAccountsInfo({
+                      ...vendor_SalesAccountsInfo,
+                      SalesAccounts_Info: {
+                        ...vendor_SalesAccountsInfo?.SalesAccounts_Info,
+                        sales_mobileno: e,
+                      },
+                    });
                   }}
                   containerStyle={{
                     width: "100%",
@@ -108,6 +206,19 @@ const SalesInfo = () => {
                   type="email"
                   placeholder="globalmedia.sales@globalmedia.com"
                   className={styles.input}
+                  value={
+                    vendor_SalesAccountsInfo?.SalesAccounts_Info
+                      ?.sales_contactEmail
+                  }
+                  onChange={(e) => {
+                    setvendor_SalesAccountsInfo({
+                      ...vendor_SalesAccountsInfo,
+                      SalesAccounts_Info: {
+                        ...vendor_SalesAccountsInfo?.SalesAccounts_Info,
+                        sales_contactEmail: e.target.value,
+                      },
+                    });
+                  }}
                 />
               </div>
             </div>
@@ -118,8 +229,71 @@ const SalesInfo = () => {
   );
 };
 
-const AccountsInfo = () => {
+const AccountsInfo = ({
+  vendor_SalesAccountsInfo,
+  setvendor_SalesAccountsInfo,
+}) => {
   const [phoneNumber, setPhoneNumber] = useState("");
+  //accounts Info:
+  useEffect(() => {
+    console.log("in useEffect for accounts info");
+    console.log(vendor_SalesAccountsInfo);
+  }, [vendor_SalesAccountsInfo]);
+
+  //first id
+  const { id } = useParams();
+
+  //second id
+  const { sid } = useParams();
+
+  let [flag, setFlag] = useState(false);
+
+  const Hashids = require("hashids/cjs");
+  const hashids = new Hashids("client-vendor");
+  let decode_sid = hashids.decode(sid);
+  console.log("decoded sid=> ", decode_sid);
+
+  // let decod = hashids.encode(id);
+  // console.log(decod);
+
+  // let decodeid = hashids.encode(sid);
+  // console.log(decodeid);
+
+  //check whether first id exists or not
+  async function checkID(id, sid) {
+    const Hashids = require("hashids/cjs");
+    const hashids = new Hashids("client-vendor");
+
+    let d_fid = hashids.decode(id);
+    let d_sid = hashids.decode(sid);
+
+    const q = query(
+      collection(db, "supply_partners"),
+      where("id", "==", d_fid[0]),
+      where("sid", "==", d_sid[0])
+    );
+
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.docs.length !== 0) {
+      // console.log("Entered this condition")
+      setFlag(true);
+      setvendor_SalesAccountsInfo(querySnapshot.docs[0].data());
+    }
+  }
+
+  useEffect(() => {
+    console.log("in useEffect", id);
+    checkID(id, sid);
+  }, [id]);
+
+  useEffect(() => {
+    if (flag) {
+      console.log("id found");
+    } else {
+      console.log("id not found");
+    }
+  }, [flag]);
+
   return (
     <section className={styles.text_form}>
       <div className={styles.left_text}>
@@ -151,6 +325,19 @@ const AccountsInfo = () => {
                   type="text"
                   placeholder="Global Media.Sales"
                   className={styles.input}
+                  value={
+                    vendor_SalesAccountsInfo?.SalesAccounts_Info
+                      ?.Accounts_contactName
+                  }
+                  onChange={(e) => {
+                    setvendor_SalesAccountsInfo({
+                      ...vendor_SalesAccountsInfo,
+                      SalesAccounts_Info: {
+                        ...vendor_SalesAccountsInfo?.SalesAccounts_Info,
+                        Accounts_contactName: e.target.value,
+                      },
+                    });
+                  }}
                 />
               </div>
             </div>
@@ -170,9 +357,19 @@ const AccountsInfo = () => {
                     autoFocus: true,
                   }}
                   country={"in"}
-                  value={phoneNumber}
+                  value={
+                    vendor_SalesAccountsInfo?.SalesAccounts_Info
+                      ?.Accounts_mobileno
+                  }
                   onChange={(e) => {
-                    setPhoneNumber(e);
+                    // setPhoneNumber(e);
+                    setvendor_SalesAccountsInfo({
+                      ...vendor_SalesAccountsInfo,
+                      SalesAccounts_Info: {
+                        ...vendor_SalesAccountsInfo?.SalesAccounts_Info,
+                        Accounts_mobileno: e,
+                      },
+                    });
                   }}
                   containerStyle={{
                     width: "100%",
@@ -199,6 +396,19 @@ const AccountsInfo = () => {
                   type="email"
                   placeholder="globalmedia.sales@globalmedia.com"
                   className={styles.input}
+                  value={
+                    vendor_SalesAccountsInfo?.SalesAccounts_Info
+                      ?.Accounts_contactEmail
+                  }
+                  onChange={(e) => {
+                    setvendor_SalesAccountsInfo({
+                      ...vendor_SalesAccountsInfo,
+                      SalesAccounts_Info: {
+                        ...vendor_SalesAccountsInfo?.SalesAccounts_Info,
+                        Accounts_contactEmail: e.target.value,
+                      },
+                    });
+                  }}
                 />
               </div>
             </div>
@@ -210,6 +420,41 @@ const AccountsInfo = () => {
 };
 
 const VendorSalesAccountsInfo = () => {
+  const history = useHistory();
+  const [vendor_SalesAccountsInfo, setvendor_SalesAccountsInfo] = useState();
+
+  const [decode_id, setdecode_id] = useState();
+  const Hashids = require("hashids/cjs");
+  const hashids = new Hashids("client-vendor");
+
+  const { id, sid } = useParams();
+  // console.log(d_fid[0]);
+
+  async function handleFormSubmit(e) {
+    e.preventDefault();
+    // console.lo;
+    //uploading information to the database:
+    let d_fid = hashids.decode(id);
+    let d_sid = hashids.decode(sid);
+    // console.log(salesInfo, d_fid[0]);
+    // console.log(accountsInfo, d_fid[0]);
+
+    //sales info
+    setDoc(
+      doc(db, "supply_partners", String(d_fid[0])),
+      vendor_SalesAccountsInfo,
+      {
+        merge: true,
+      }
+    )
+      .then(() => {
+        console.log("data updated successfully");
+        // history.push(``)
+      })
+      .catch((er) => {
+        console.log("error", er);
+      });
+  }
   return (
     <>
       {/* <Header/> */}
@@ -224,14 +469,20 @@ const VendorSalesAccountsInfo = () => {
         </div>
         {/* components */}
         <div className={styles.sales}>
-          <SalesInfo />
+          <SalesInfo
+            vendor_SalesAccountsInfo={vendor_SalesAccountsInfo}
+            setvendor_SalesAccountsInfo={setvendor_SalesAccountsInfo}
+          />
         </div>
-        <AccountsInfo />
+        <AccountsInfo
+          vendor_SalesAccountsInfo={vendor_SalesAccountsInfo}
+          setvendor_SalesAccountsInfo={setvendor_SalesAccountsInfo}
+        />
 
         <div className={styles.next}>
-          <Link to="/client-onboarding">
-            <button className={styles.btnNext}>NEXT</button>
-          </Link>
+          <button className={styles.btnNext} onClick={handleFormSubmit}>
+            NEXT
+          </button>
         </div>
       </div>
     </>

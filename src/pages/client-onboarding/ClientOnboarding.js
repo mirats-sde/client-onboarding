@@ -3,11 +3,21 @@ import logo from "../../assets/logo.png";
 import styles from "../../utils/formHelper.module.css";
 import InputHelperCard from "../../components/input-helper-card/InputHelperCard";
 import { Link } from "react-router-dom";
+import moment from "moment";
 import bindingTrust from "../../assets/bindingTrust.png";
 import ProgressBar from "../../components/progress-bar/ProgressBar";
 import { useParams } from "react-router-dom";
 import { db } from "../../firebase-config";
 import storage from "../../firebase-config";
+import styless from "../../components/file-upload/FileUpload.module.css";
+import CircularProgress from "@mui/material/CircularProgress";
+import Tooltip from "@mui/material/Tooltip";
+import { AiOutlineFileAdd } from "react-icons/ai";
+import { BsCircleFill } from "react-icons/bs";
+import { format } from "date-fns";
+import { Timestamp } from "firebase/firestore";
+// import { MdOutlineDeleteOutline } from "react-icons/md";
+import { TiDelete } from "react-icons/ti";
 
 import Hashids from "hashids";
 import {
@@ -30,8 +40,12 @@ import {
   query,
   where,
   setDoc,
+  snapshotEqual,
 } from "firebase/firestore";
 import { useState, useEffect, useRef } from "react";
+import { DataObjectSharp, UploadFile } from "@mui/icons-material";
+import { decode } from "@firebase/util";
+import { useHistory } from "react-router-dom";
 
 const helperCardData = [
   {
@@ -42,17 +56,32 @@ const helperCardData = [
   },
 ];
 
+// function asUtcIsoString(date) {
+//   const y = date.getUTCFullYear();
+//   const m = `${date.getUTCMonth() + 1}`.padStart(2, "0");
+//   const d = `${date.getUTCDate()}`.padStart(2, "0");
+//   return `${y}-${m}-${d}`;
+// }
+
 const ClientOnboarding = () => {
+  const history = useHistory();
   const storage = getStorage();
-  // console.log(storage);
+  let iconStyles = { color: "#7B61FF" };
+  let iconStylesDisabled = { color: "gray" };
+  let [showProgress, setShowProgress] = useState(false);
+
   const [entityInfo, setEntityInfo] = useState();
-  const [taxCerti, setTaxCerti] = useState({ name: "", url: "" });
+
   const [startdate, setstartdate] = useState();
   const tax_id_certi_Ref = useRef();
 
   useEffect(() => {
     console.log(entityInfo);
   }, [entityInfo]);
+
+  //tax certificate file upload:
+  const [taxcert, settaxcert] = useState();
+  const tax_cert_ref = useRef();
 
   //first id
   const { id } = useParams();
@@ -69,11 +98,11 @@ const ClientOnboarding = () => {
   let decode_sid = hashids.decode(sid);
   console.log("decoded sid=> ", decode_sid);
 
-  let decod = hashids.encode(id);
-  console.log(decod);
+  // let decod = hashids.encode(id);
+  // console.log(decod);
 
-  let decodeid = hashids.encode(sid);
-  console.log(decodeid);
+  // let decodeid = hashids.encode(sid);
+  // console.log(decodeid);
 
   //check whether first id exists or not
   async function checkID(id, sid) {
@@ -96,28 +125,84 @@ const ClientOnboarding = () => {
     }
   }
 
-  useEffect(() => {
-    console.log("in useeffect", id);
-    checkID(id, sid);
-    const storageRef = ref(storage, `/legal_entity/${decode_id[0]}`);
-    // console.log(storageRef);
+  //tax certificate reference:
+  const taxcertref = ref(storage, `Organisation/legal-entity/${decode_id[0]}`);
+
+  //deleting file from storage:
+  const deleteFileFromStorage = (storageRef) => {
+    console.log("deleting file");
     listAll(storageRef).then((res) => {
-      console.log(res);
+      console.log(res.items);
       res.items.forEach((itemRef) => {
-        // console.log(res.name);
-        console.log(itemRef.name);
-        setTaxCerti((prevArr) => {
-          return { ...prevArr, name: itemRef.name };
+        setShowProgress(true);
+        deleteObject(itemRef)
+          .then(() => {
+            //file deleted successfullly
+            console.log("file deleted successfully", itemRef);
+            setShowProgress(false);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      });
+    });
+  };
+
+  //uploading tax certificate file
+  const UploadFiles = (id, file) => {
+    if (!file) {
+      console.log("tax certificate file not found!");
+      return;
+    } else {
+      console.log("file found");
+      let filename = file.name;
+      const fileref = ref(
+        storage,
+        `Organisation/legal-entity/${id}/${filename}`
+      );
+      const uploadtask = uploadBytesResumable(fileref, file);
+      uploadtask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress = Math.round(
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+          );
+          console.log("progress bar is: ", progress);
+        },
+        (er) => {
+          console.log("error while uploading file", er.message);
+        },
+        () => {
+          getDownloadURL(uploadtask.snapshot.ref).then((url) => {
+            console.log(url);
+          });
+        }
+      );
+    }
+  };
+
+  //displaying tax certificate files
+  function ListTaxFiles() {
+    listAll(taxcertref).then((res) => {
+      res.items.forEach((itemRef) => {
+        settaxcert((preobj) => {
+          return { ...preobj, name: itemRef.name };
         });
         getDownloadURL(itemRef).then((url) => {
-          setTaxCerti((prevArr) => {
-            return { ...prevArr, url: url };
+          settaxcert((preobj) => {
+            return { ...preobj, url: url };
           });
         });
       });
     });
+  }
+
+  useEffect(() => {
+    console.log("in useeffect", id);
+    checkID(id, sid);
+    // const storageRef = ref(storage, `/legal_entity/${decode_id[0]}`);
+    ListTaxFiles();
   }, []);
-  console.log(taxCerti);
 
   useEffect(() => {
     if (flag) {
@@ -127,11 +212,11 @@ const ClientOnboarding = () => {
     }
   }, [flag]);
 
+  //saving form data into database.
   async function handleFormSubmit(e) {
     e.preventDefault();
-    //  uploading files in storage
-    console.log(entityInfo.legal_entity.tax_id_certi);
-    UploadFiles(decode_id[0], entityInfo.legal_entity.tax_id_certi);
+
+    UploadFiles(decode_id[0], taxcert || entityInfo?.legal_entity?.taxFile);
 
     // uploading all other information into database
     await setDoc(doc(db, "Organisation", String(decode_id[0])), entityInfo, {
@@ -139,18 +224,17 @@ const ClientOnboarding = () => {
     })
       .then(() => {
         console.log("data uploaded successfully");
+        history.push(`/business-info/${id}/${sid}`);
       })
       .catch((er) => {
         console.log("Error", er);
       });
   }
 
-  // const timest = entityInfo?.legal_entity?.start_date;
-  // console.log(timest);
+  useEffect(() => {
+    console.log(entityInfo?.legal_entity?.start_date);
+  }, [entityInfo?.legal_entity?.start_date]);
 
-  // console.log(entityInfo?.legal_entity?.start_date);
-
-  //file upload
   return (
     <>
       <div className={styles.onboarding}>
@@ -181,7 +265,7 @@ const ClientOnboarding = () => {
           </div>
           <div className={styles.right_form}>
             <div className={styles.client_form}>
-              <form>
+              <form onSubmit={handleFormSubmit}>
                 {/* comp name */}
                 <div className={styles.input_group}>
                   <div className={styles.label}>
@@ -206,6 +290,7 @@ const ClientOnboarding = () => {
                         });
                         tax_id_certi_Ref.current.value = e.target.files;
                       }}
+                      required
                     />
                   </div>
                 </div>
@@ -232,6 +317,7 @@ const ClientOnboarding = () => {
                           },
                         });
                       }}
+                      required
                     />
                     <input
                       type="text"
@@ -347,6 +433,7 @@ const ClientOnboarding = () => {
                           },
                         });
                       }}
+                      required
                     />
                   </div>
                 </div>
@@ -358,24 +445,96 @@ const ClientOnboarding = () => {
                       <span className={styles.required}>Required</span>
                     </label>
                   </div>
-                  <div className={styles.inputs}>
-                    <input
-                      type="file"
-                      className={styles.input}
-                      ref={tax_id_certi_Ref}
-                      onChange={(e) => {
-                        setEntityInfo({
-                          ...entityInfo,
-                          legal_entity: {
-                            ...entityInfo?.legal_entity,
-                            tax_id_certi: e.target.files[0],
-                          },
-                        });
-                      }}
-                    />{" "}
-                    <a href={taxCerti.url}>{taxCerti.name}</a>
-                  </div>
-                  <FileUpload />
+
+                  {!taxcert ? (
+                    <div className={styless.file_upload}>
+                      <label className={styless.icon} htmlFor="fileIcon">
+                        <AiOutlineFileAdd style={iconStyles} size={60} />
+                      </label>
+
+                      <input
+                        type="file"
+                        id="fileIcon"
+                        ref={tax_id_certi_Ref}
+                        onChange={(e) => {
+                          setEntityInfo({
+                            ...entityInfo,
+                            legal_entity: {
+                              ...entityInfo?.legal_entity,
+                              taxFile: e.target.files[0],
+                            },
+                          });
+                          <a href="">{taxcert}</a>;
+                        }}
+                        required
+                      ></input>
+                      {
+                        <div className={styless.warning}>
+                          <ul>
+                            <li>
+                              <span>
+                                <BsCircleFill size={5} />
+                              </span>
+                              File should be of maximum 2 MB
+                            </li>
+                            <li>
+                              <span>
+                                <BsCircleFill size={5} />
+                              </span>
+                              File should be uploaded in pdf, jpg, png format
+                              only
+                            </li>
+                          </ul>
+                        </div>
+                      }
+                    </div>
+                  ) : (
+                    <div className={styless.file_upload}>
+                      <Tooltip
+                        title="You have already uploaded file, Please Remove and upload"
+                        followCursor
+                      >
+                        <label className={styless.icon} htmlFor="fileIcon">
+                          <AiOutlineFileAdd
+                            style={iconStylesDisabled}
+                            size={60}
+                          />
+                        </label>
+                      </Tooltip>
+
+                      <input type="file" id="fileIcon" disabled hidden></input>
+
+                      {
+                        <div className={styless.warning}>
+                          <ul>
+                            <li
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                flexDirection: "row",
+                              }}
+                            >
+                              <a href={taxcert?.url}>{taxcert?.name}</a>
+
+                              {!taxcert ? (
+                                <></>
+                              ) : (
+                                <TiDelete
+                                  size={20}
+                                  color="red"
+                                  onClick={() =>
+                                    deleteFileFromStorage(taxcertref)
+                                  }
+                                />
+                              )}
+
+                              {showProgress && <CircularProgress />}
+                            </li>
+                          </ul>
+                        </div>
+                      }
+                    </div>
+                  )}
                 </div>
                 {/* employees */}
                 <div className={styles.input_group}>
@@ -397,6 +556,7 @@ const ClientOnboarding = () => {
                           },
                         });
                       }}
+                      required
                     >
                       <option>1-15 Employees</option>
                       <option>15-60 Employees</option>
@@ -419,41 +579,32 @@ const ClientOnboarding = () => {
                     <input
                       type="date"
                       className={styles.input}
-                      value={startdate}
+                      value={entityInfo?.legal_entity?.start_date
+                        ?.toDate()
+                        .toLocaleDateString("en-CA")}
                       onChange={(e) => {
                         setEntityInfo({
                           ...entityInfo,
                           legal_entity: {
                             ...entityInfo?.legal_entity,
-                            start_date: new Date(e.target.value),
+                            start_date: Timestamp.fromDate(
+                              new Date(e.target.value)
+                            ),
                           },
                         });
                       }}
-                      // onChange={(e) => {
-                      //   setEntityInfo({
-                      //     ...entityInfo,
-                      //     legal_entity: {
-                      //       ...entityInfo?.legal_entity,
-                      //       start_date: new Date(e.target.value),
-                      //     },
-                      //   });
-                      // }}
+                      required
                     />
                   </div>
                 </div>
+                <div className={styles.next}>
+                  {/* <Link to={`business-info/${id}/${sid}`}> */}
+                  <button className={styles.btnNext} type="submit">
+                    NEXT
+                  </button>
+                  {/* </Link> */}
+                </div>
               </form>
-            </div>
-            <div className={styles.next}>
-              <Link to="/business-info/id/sid">
-                <button
-                  // Link
-                  // to="/business-info/id/sid"
-                  className={styles.btnNext}
-                  onClick={handleFormSubmit}
-                >
-                  NEXT
-                </button>
-              </Link>
             </div>
           </div>
         </section>
@@ -463,52 +614,3 @@ const ClientOnboarding = () => {
 };
 
 export default ClientOnboarding;
-
-const DeletePreviousResume = (id) => {
-  const folderRef = ref(storage, `/legal_entity/${id}`);
-  listAll(folderRef).then((res) => {
-    console.log(res.items);
-    res.items.forEach((itemRef) => {
-      // All the items under listRef.
-      deleteObject(itemRef)
-        .then(() => {
-          // File deleted successfully
-          console.log("file deleted successfully", itemRef);
-        })
-        .catch((error) => {
-          console.log(error);
-          // Uh-oh, an error occurred!
-        });
-    });
-  });
-};
-
-const UploadFiles = (id, file) => {
-  if (!file) return;
-  //Empty file
-  else {
-    let filename = file.name;
-    // If File extension is zip then only proceed
-    DeletePreviousResume(id);
-    const storageref = ref(storage, `/legal_entity/${id}/${filename}`);
-    const uploadTask = uploadBytesResumable(storageref, file);
-
-    uploadTask.on(
-      "state_changed",
-      (snapshot) => {
-        const progress = Math.round(
-          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-        );
-        console.log("PRogress bar is ", progress);
-      },
-      (er) => {
-        console.log("Error while uploading file ", er.message);
-      },
-      () => {
-        getDownloadURL(uploadTask.snapshot.ref).then((url) => {
-          console.log(url);
-        });
-      }
-    );
-  }
-};

@@ -33,6 +33,7 @@ import {
 import { useState, useEffect, useRef } from "react";
 import { decode } from "punycode";
 import encUtf16 from "crypto-js/enc-utf16";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 const helperCardData = [
   {
@@ -44,6 +45,7 @@ const helperCardData = [
 ];
 
 const BusinessInfo = () => {
+  const history = useHistory();
   const [businessInfo, setbusinessInfo] = useState();
   const [phoneNumber, setPhoneNumber] = useState("");
 
@@ -118,6 +120,7 @@ const BusinessInfo = () => {
     })
       .then(() => {
         console.log("data updated successfully");
+        history.push(`/documents-links/${id}/${sid}`);
       })
       .catch((er) => {
         console.log("error", er);
@@ -154,7 +157,7 @@ const BusinessInfo = () => {
           </div>
           <div className={styles.right_form}>
             <div className={styles.client_form}>
-              <form>
+              <form onSubmit={handleFormSubmit}>
                 {/* contact name */}
                 <div className={styles.input_group}>
                   <div className={styles.label}>
@@ -178,6 +181,7 @@ const BusinessInfo = () => {
                           },
                         });
                       }}
+                      required
                     />
                   </div>
                 </div>
@@ -245,6 +249,7 @@ const BusinessInfo = () => {
                           },
                         });
                       }}
+                      required
                     />
                   </div>
                 </div>
@@ -258,7 +263,7 @@ const BusinessInfo = () => {
                   </div>
                   <div className={styles.inputs}>
                     <input
-                      type="text"
+                      type="url"
                       // placeholder="globalmedia.offices@globalmedia.com"
                       placeholder="globalmedia.offices.com"
                       className={styles.input}
@@ -272,6 +277,7 @@ const BusinessInfo = () => {
                           },
                         });
                       }}
+                      required
                     />
                   </div>
                 </div>
@@ -334,16 +340,16 @@ const BusinessInfo = () => {
                     />
                   </div>
                 </div>
+                <div className={styles.next}>
+                  {/* <Link to="/documents-links"> */}
+                  <button className={styles.btnNext} type="submit">
+                    NEXT
+                  </button>
+                  {/* </Link> */}
+                </div>
               </form>
             </div>
             {/* next button */}
-            <div className={styles.next}>
-              {/* <Link to="/documents-links"> */}
-              <button className={styles.btnNext} onClick={handleFormSubmit}>
-                NEXT
-              </button>
-              {/* </Link> */}
-            </div>
           </div>
         </section>
       </div>

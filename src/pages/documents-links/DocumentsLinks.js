@@ -41,6 +41,7 @@ import {
 } from "firebase/firestore";
 import { flexbox } from "@mui/system";
 import { DocumentScanner } from "@mui/icons-material";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 const helperCardData = [
   {
@@ -52,6 +53,7 @@ const helperCardData = [
 ];
 
 const DocumentsLinks = () => {
+  const history = useHistory();
   const [documentInfo, setDocumentInfo] = useState();
   const storage = getStorage();
   let iconStyles = { color: "#7B61FF" };
@@ -66,12 +68,6 @@ const DocumentsLinks = () => {
   // esomar upload:
   const [esomarFile, setesomarFile] = useState();
   const esomar_ref = useRef();
-
-  // //panel url:
-  // const [panelurl, setpanelurl] = useState();
-
-  // //esomar url:
-  // const [esomarurl, setesomarurl] = useState();
 
   //document
   useEffect(() => {
@@ -107,11 +103,14 @@ const DocumentsLinks = () => {
   //panel book reference:
   const panelBookRef = ref(
     storage,
-    `/document-links/PanelBook/${decode_id[0]}`
+    `Organisation/document-links/PanelBook/${decode_id[0]}`
   );
 
   //ESOMAR reference:
-  const ESOMARRef = ref(storage, `/document-links/ESOMAR/${decode_id[0]}`);
+  const ESOMARRef = ref(
+    storage,
+    `Organisation/document-links/ESOMAR/${decode_id[0]}`
+  );
 
   //check whether the id exists or not:
   async function checkID(id, sid) {
@@ -178,10 +177,6 @@ const DocumentsLinks = () => {
     });
   };
 
-  // console.log(documentInfo?.documents_info?.panelFile);
-  // console.log(documentInfo?.documents_info?.esomarFile);
-  // console.log(documentInfo);
-
   const UploadPanelBookFiles = (id, panelfile) => {
     if (!panelfile) {
       console.log("panel book file not found");
@@ -194,7 +189,7 @@ const DocumentsLinks = () => {
       // If File extension is zip then only proceed
       const panelfileref = ref(
         storage,
-        `/document-links/PanelBook/${id}/${panelfilename}`
+        `Organisation/document-links/PanelBook/${id}/${panelfilename}`
       );
       const paneluploadTask = uploadBytesResumable(panelfileref, panelfile);
 
@@ -218,6 +213,7 @@ const DocumentsLinks = () => {
     }
   };
 
+  //esomar file upload
   const UploadESOMARFiles = (id, esomarfile) => {
     if (!esomarfile) {
       console.log("esomar file not found");
@@ -227,7 +223,7 @@ const DocumentsLinks = () => {
       let esomarfilename = esomarfile.name;
       const esomarfileref = ref(
         storage,
-        `/document-links/ESOMAR/${id}/${esomarfilename}`
+        `Organisation/document-links/ESOMAR/${id}/${esomarfilename}`
       );
       const esomaruploadtask = uploadBytesResumable(esomarfileref, esomarfile);
       esomaruploadtask.on(
@@ -318,6 +314,7 @@ const DocumentsLinks = () => {
     })
       .then(() => {
         console.log("data updated successfully");
+        history.push(`/sales-accounts/${id}/${sid}`);
       })
       .catch((er) => {
         console.log("error", er);
@@ -353,7 +350,7 @@ const DocumentsLinks = () => {
           </div>
           <div className={styles.right_form}>
             <div className={styles.document_link}>
-              <form>
+              <form onSubmit={handleFormSubmit}>
                 <div className={styles.form_inputs}>
                   {/* panel book */}
                   <label>
@@ -683,14 +680,14 @@ const DocumentsLinks = () => {
                     </div>
                   </div>
                 </div>
+                <div className={styles.next}>
+                  {/* <Link to="/sales-accounts"> */}
+                  <button className={styles.btnNext} type="submit">
+                    NEXT
+                  </button>
+                  {/* </Link> */}
+                </div>
               </form>
-            </div>
-            <div className={styles.next}>
-              {/* <Link to="/sales-accounts"> */}
-              <button className={styles.btnNext} onClick={handleFormSubmit}>
-                NEXT
-              </button>
-              {/* </Link> */}
             </div>
           </div>
         </section>

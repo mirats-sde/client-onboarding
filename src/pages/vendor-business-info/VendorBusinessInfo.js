@@ -1,12 +1,28 @@
-import logo from "../../assets/logo.png"
+import logo from "../../assets/logo.png";
 import styles from "../../utils/formHelper.module.css";
 import InputHelperCard from "../../components/input-helper-card/InputHelperCard";
 import ProgressBar from "../../components/progress-bar/ProgressBar";
-import { Link } from "react-router-dom";
 import value from "../../assets/value.png";
 import PhoneInput from "react-phone-input-2";
-import { useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { db } from "../../firebase-config";
+import { useDebugValue, useEffect, useState } from "react";
 import "react-phone-input-2/lib/style.css";
+import {
+  collection,
+  getDocs,
+  getDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  query,
+  where,
+  setDoc,
+  snapshotEqual,
+} from "firebase/firestore";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+
 // import 'react-phone-input-2/lib/material.css'
 
 const helperCardData = [
@@ -19,7 +35,83 @@ const helperCardData = [
 ];
 
 const VendorBusinessInfo = () => {
+  const history = useHistory();
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [vendor_businessInfo, setvendor_businessInfo] = useState();
+  let [flag, setFlag] = useState(false);
+
+  //vendor_entityInfo:
+  useEffect(() => {
+    console.log(vendor_businessInfo);
+  }, [vendor_businessInfo]);
+
+  //first id:
+  const { id } = useParams();
+
+  //second id:
+  const { sid } = useParams();
+
+  const Hashids = require("hashids/cjs");
+  const hashids = new Hashids("client-vendor");
+  let decode_id = hashids.decode(id);
+  console.log("decoded id=>", decode_id);
+  let decode_sid = hashids.decode(sid);
+  console.log("decoded sid=>", decode_sid);
+
+  //check whether first id exists or not:
+  async function checkID(id, sid) {
+    const Hashids = require("hashids/cjs");
+    const hashids = new Hashids("client-vendor");
+
+    console.log(decode_id[0]);
+    console.log(decode_sid[0]);
+    const q = query(
+      collection(db, "supply_partners"),
+      where("id", "==", decode_id[0]),
+      where("sid", "==", decode_sid[0])
+    );
+
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.docs.length !== 0) {
+      setFlag(true);
+      setvendor_businessInfo(querySnapshot.docs[0].data());
+    }
+  }
+
+  useEffect(() => {
+    console.log("in main useEffect");
+    checkID(id, sid);
+  }, []);
+
+  useEffect(() => {
+    if (flag) {
+      console.log("id found");
+    } else {
+      console.log("id not found");
+    }
+  }, [flag]);
+
+  //saving form data into database:
+  async function handleFormSubmit(e) {
+    e.preventDefault();
+
+    //uploading all info from here:
+    await setDoc(
+      doc(db, "supply_partners", String(decode_id[0])),
+      vendor_businessInfo,
+      {
+        merge: true,
+      }
+    )
+      .then(() => {
+        console.log("data uploaded successfully!!!");
+        history.push(`/vendor-documents-links/${id}/${sid}`);
+      })
+      .catch((er) => {
+        console.log("Error", er);
+      });
+  }
+
   return (
     <>
       {/* <Header/> */}
@@ -37,18 +129,20 @@ const VendorBusinessInfo = () => {
             <h1>Business Contact Information</h1>
             <p>This information will be visible all across our console</p>
             <div className={styles.inputHelperCard}>
-              {helperCardData.map((data) => (
-                <InputHelperCard
-                  helperTitle={data.helperTitle}
-                  helperDesc={data.helperDesc}
-                  helperLogo={data.helperLogo}
-                />
+              {helperCardData.map((data, i) => (
+                <div key={i}>
+                  <InputHelperCard
+                    helperTitle={data.helperTitle}
+                    helperDesc={data.helperDesc}
+                    helperLogo={data.helperLogo}
+                  />
+                </div>
               ))}
             </div>
           </div>
           <div className={styles.right_form}>
             <div className={styles.client_form}>
-              <form>
+              <form onSubmit={handleFormSubmit}>
                 {/* contact name */}
                 <div className={styles.input_group}>
                   <div className={styles.label}>
@@ -62,6 +156,19 @@ const VendorBusinessInfo = () => {
                       type="text"
                       placeholder="Global Media"
                       className={styles.input}
+                      value={
+                        vendor_businessInfo?.business_contact_info?.contact_name
+                      }
+                      onChange={(e) => {
+                        setvendor_businessInfo({
+                          ...vendor_businessInfo,
+                          business_contact_info: {
+                            ...vendor_businessInfo?.business_contact_info,
+                            contact_name: e.target.value,
+                          },
+                        });
+                      }}
+                      required
                     />
                   </div>
                 </div>
@@ -81,9 +188,18 @@ const VendorBusinessInfo = () => {
                         autoFocus: true,
                       }}
                       country={"in"}
-                      value={phoneNumber}
+                      value={
+                        vendor_businessInfo?.business_contact_info
+                          ?.contact_mobileno
+                      }
                       onChange={(e) => {
-                        setPhoneNumber(e);
+                        setvendor_businessInfo({
+                          ...vendor_businessInfo,
+                          business_contact_info: {
+                            ...vendor_businessInfo?.business_contact_info,
+                            contact_mobileno: e,
+                          },
+                        });
                       }}
                       containerStyle={{
                         width: "100%",
@@ -110,6 +226,20 @@ const VendorBusinessInfo = () => {
                       type="email"
                       placeholder="globalmedia.offices@globalmedia.com"
                       className={styles.input}
+                      value={
+                        vendor_businessInfo?.business_contact_info
+                          ?.contact_email
+                      }
+                      onChange={(e) => {
+                        setvendor_businessInfo({
+                          ...vendor_businessInfo,
+                          business_contact_info: {
+                            ...vendor_businessInfo?.business_contact_info,
+                            contact_email: e.target.value,
+                          },
+                        });
+                      }}
+                      required
                     />
                   </div>
                 </div>
@@ -123,9 +253,23 @@ const VendorBusinessInfo = () => {
                   </div>
                   <div className={styles.inputs}>
                     <input
-                      type="email"
+                      type="url"
                       placeholder="globalmedia.offices.com"
                       className={styles.input}
+                      value={
+                        vendor_businessInfo?.business_contact_info
+                          ?.company_websiteadd
+                      }
+                      onChange={(e) => {
+                        setvendor_businessInfo({
+                          ...vendor_businessInfo,
+                          business_contact_info: {
+                            ...vendor_businessInfo?.business_contact_info,
+                            company_websiteadd: e.target.value,
+                          },
+                        });
+                      }}
+                      required
                     />
                   </div>
                 </div>
@@ -142,6 +286,19 @@ const VendorBusinessInfo = () => {
                       type="email"
                       placeholder="globalmedia.offices@globalmedia.com"
                       className={styles.input}
+                      value={
+                        vendor_businessInfo?.business_contact_info
+                          ?.data_protection_mail
+                      }
+                      onChange={(e) => {
+                        setvendor_businessInfo({
+                          ...vendor_businessInfo,
+                          business_contact_info: {
+                            ...vendor_businessInfo?.business_contact_info,
+                            data_protection_mail: e.target.value,
+                          },
+                        });
+                      }}
                     />
                   </div>
                 </div>
@@ -158,17 +315,32 @@ const VendorBusinessInfo = () => {
                       type="email"
                       placeholder="globalmedia.offices@globalmedia.com"
                       className={styles.input}
+                      value={
+                        vendor_businessInfo?.business_contact_info
+                          ?.infosecurity_mail
+                      }
+                      onChange={(e) => {
+                        setvendor_businessInfo({
+                          ...vendor_businessInfo,
+                          business_contact_info: {
+                            ...vendor_businessInfo?.business_contact_info,
+                            infosecurity_mail: e.target.value,
+                          },
+                        });
+                      }}
                     />
                   </div>
+                </div>
+                <div className={styles.next}>
+                  {/* <Link to="/vendor-documents-links"> */}
+                  <button className={styles.btnNext} type="submit">
+                    NEXT
+                  </button>
+                  {/* </Link> */}
                 </div>
               </form>
             </div>
             {/* next button */}
-            <div className={styles.next}>
-              <Link to="/vendor-documents-links">
-                <button className={styles.btnNext}>NEXT</button>
-              </Link>
-            </div>
           </div>
         </section>
       </div>
