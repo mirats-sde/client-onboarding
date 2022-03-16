@@ -18,6 +18,7 @@ import {
 
 import { db } from "./firebase-config";
 import { collection, query, where, getDocs } from "firebase/firestore";
+import ScrollToTop from "./utils/ScrollToTop";
 
 function BlogPost() {
   let { id } = useParams();
