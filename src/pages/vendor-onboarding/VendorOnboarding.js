@@ -15,6 +15,8 @@ import { BsCircleFill } from "react-icons/bs";
 import { useDebugValue, useEffect, useState, useRef } from "react";
 import { TiDelete } from "react-icons/ti";
 import { Timestamp } from "firebase/firestore";
+import Error from "../../components/error/Error";
+
 import {
   getDownloadURL,
   getStorage,
@@ -171,6 +173,8 @@ const VendorOnboarding = () => {
     if (querySnapshot.docs.length !== 0) {
       setFlag(true);
       setvendor_entityInfo(querySnapshot.docs[0].data());
+    } else {
+      setvendor_entityInfo();
     }
   }
 
@@ -223,374 +227,389 @@ const VendorOnboarding = () => {
   return (
     <>
       {/* <Header/> */}
-      <div className={styles.onboarding}>
-        <div className={styles.logo}>
-          <img src={logo} alt="logo" />
-        </div>
-        <ProgressBar progress="25" />
-        <div className={styles.onboarding_text}>
-          <h1>Vendor Onboarding</h1>
-          <p>Key step to understand your expectations</p>
-        </div>
-        <section className={styles.text_form}>
-          <div className={styles.left_text}>
-            <h1>Legal Entity Information</h1>
-            <p>This information will be visible all across our console</p>
-
-            <div className={styles.inputHelperCard}>
-              {helperCardData.map((data, i) => (
-                <div key={i}>
-                  <InputHelperCard
-                    helperTitle={data.helperTitle}
-                    helperDesc={data.helperDesc}
-                    helperLogo={data.helperLogo}
-                  />
-                </div>
-              ))}
-            </div>
+      {vendor_entityInfo != undefined ? (
+        <div className={styles.onboarding}>
+          <div className={styles.logo}>
+            <img src={logo} alt="logo" />
           </div>
-          <div className={styles.right_form}>
-            <div className={styles.client_form}>
-              <form onSubmit={handleFormSubmit}>
-                {/* comp name */}
-                <div className={styles.input_group}>
-                  <div className={styles.label}>
-                    <label>
-                      Company Name
-                      <span className={styles.required}>Required</span>
-                    </label>
-                  </div>
-                  <div className={styles.inputs}>
-                    <input
-                      type="text"
-                      placeholder="Barol White"
-                      className={styles.input}
-                      value={vendor_entityInfo?.legal_entity?.company_name}
-                      onChange={(e) => {
-                        setvendor_entityInfo({
-                          ...vendor_entityInfo,
-                          legal_entity: {
-                            ...vendor_entityInfo?.legal_entity,
-                            company_name: e.target.value,
-                          },
-                        });
-                      }}
-                      required
-                    />
-                  </div>
-                </div>
-                {/* comp address */}
-                <div className={styles.input_group}>
-                  <div className={styles.label}>
-                    <label>
-                      Company Registered Address
-                      <span className={styles.required}>Required</span>
-                    </label>
-                  </div>
-                  <div className={styles.inputs}>
-                    <input
-                      type="text"
-                      placeholder="Street Address"
-                      className={styles.input}
-                      value={vendor_entityInfo?.legal_entity?.company_address1}
-                      onChange={(e) => {
-                        setvendor_entityInfo({
-                          ...vendor_entityInfo,
-                          legal_entity: {
-                            ...vendor_entityInfo?.legal_entity,
-                            company_address1: e.target.value,
-                          },
-                        });
-                      }}
-                      required
-                    />
-                    <input
-                      type="text"
-                      placeholder="Street Address 2 (If Necessary)"
-                      className={styles.input}
-                      value={vendor_entityInfo?.legal_entity?.company_address2}
-                      onChange={(e) => {
-                        setvendor_entityInfo({
-                          ...vendor_entityInfo,
-                          legal_entity: {
-                            ...vendor_entityInfo?.legal_entity,
-                            company_address2: e.target.value,
-                          },
-                        });
-                      }}
-                    />
-                    <label>City</label>
-                    <select
-                      placeholder="Your City"
-                      value={vendor_entityInfo?.legal_entity?.city}
-                      onChange={(e) => {
-                        setvendor_entityInfo({
-                          ...vendor_entityInfo,
-                          legal_entity: {
-                            ...vendor_entityInfo?.legal_entity,
-                            city: e.target.value,
-                          },
-                        });
-                      }}
-                    >
-                      <option>Mumbai</option>
-                      <option>Delhi</option>
-                      <option>Bangalore</option>
-                    </select>
-                    <div className={styles.code_country}>
-                      <div className={styles.zip_code}>
-                        <label>Zip Code</label>
-                        <input
-                          type="number"
-                          className={styles.code_input}
-                          value={vendor_entityInfo?.legal_entity?.zip_code}
-                          onChange={(e) => {
-                            setvendor_entityInfo({
-                              ...vendor_entityInfo,
-                              legal_entity: {
-                                ...vendor_entityInfo?.legal_entity,
-                                zip_code: e.target.value,
-                              },
-                            });
-                          }}
-                        />
-                      </div>
-                      <div className={styles.country}>
-                        <label>Country</label>
-                        <select
-                          value={vendor_entityInfo?.legal_entity?.country}
-                          onChange={(e) => {
-                            setvendor_entityInfo({
-                              ...vendor_entityInfo,
-                              legal_entity: {
-                                ...vendor_entityInfo?.legal_entity,
-                                country: e.target.value,
-                              },
-                            });
-                          }}
-                        >
-                          <option>India</option>
-                          <option>USA</option>
-                          <option>Japan</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    className={styles.check_input}
-                    checked={vendor_entityInfo?.legal_entity?.billing_address}
-                    onChange={(e) => {
-                      setvendor_entityInfo({
-                        ...vendor_entityInfo,
-                        legal_entity: {
-                          ...vendor_entityInfo?.legal_entity,
-                          billing_address: e.target.checked,
-                        },
-                      });
-                    }}
-                  />
-                  <span className={styles.check}>
-                    <i>Billing address is same as shipping</i>
-                  </span>
-                </div>
-                {/* comp reg no */}
-                <div className={styles.input_group}>
-                  <div className={styles.label}>
-                    <label>
-                      Company Registeration No.
-                      <span className={styles.required}>Required</span>
-                    </label>
-                  </div>
-                  <div className={styles.inputs}>
-                    <input
-                      type="text"
-                      placeholder="Ontario"
-                      className={styles.input}
-                      value={vendor_entityInfo?.legal_entity?.regno}
-                      onChange={(e) => {
-                        setvendor_entityInfo({
-                          ...vendor_entityInfo,
-                          legal_entity: {
-                            ...vendor_entityInfo?.legal_entity,
-                            regno: e.target.value,
-                          },
-                        });
-                      }}
-                      required
-                    />
-                  </div>
-                </div>
-                {/* tax id */}
-                <div className={styles.input_group}>
-                  <div className={styles.label}>
-                    <label>
-                      Tax ID Certificate
-                      <span className={styles.required}>Required</span>
-                    </label>
-                  </div>
-                  {!taxcert ? (
-                    <div className={styless.file_upload}>
-                      <label className={styless.icon} htmlFor="fileIcon">
-                        <AiOutlineFileAdd style={iconStyles} size={60} />
-                      </label>
+          <ProgressBar progress="25" />
+          <div className={styles.onboarding_text}>
+            <h1>Vendor Onboarding</h1>
+            <p>Key step to understand your expectations</p>
+          </div>
+          <section className={styles.text_form}>
+            <div className={styles.left_text}>
+              <h1>Legal Entity Information</h1>
+              <p>This information will be visible all across our console</p>
 
+              <div className={styles.inputHelperCard}>
+                {helperCardData.map((data, i) => (
+                  <div key={i}>
+                    <InputHelperCard
+                      helperTitle={data.helperTitle}
+                      helperDesc={data.helperDesc}
+                      helperLogo={data.helperLogo}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className={styles.right_form}>
+              <div className={styles.client_form}>
+                <form onSubmit={handleFormSubmit}>
+                  {/* comp name */}
+                  <div className={styles.input_group}>
+                    <div className={styles.label}>
+                      <label>
+                        Company Name
+                        <span className={styles.required}>Required</span>
+                      </label>
+                    </div>
+                    <div className={styles.inputs}>
                       <input
-                        type="file"
-                        id="fileIcon"
-                        ref={tax_id_certi_Ref}
+                        type="text"
+                        placeholder="Barol White"
+                        className={styles.input}
+                        value={vendor_entityInfo?.legal_entity?.company_name}
                         onChange={(e) => {
                           setvendor_entityInfo({
                             ...vendor_entityInfo,
                             legal_entity: {
                               ...vendor_entityInfo?.legal_entity,
-                              taxFile: e.target.files[0],
+                              company_name: e.target.value,
                             },
                           });
-                          <a href="">{taxcert}</a>;
                         }}
                         required
-                      ></input>
-                      {
-                        <div className={styless.warning}>
-                          <ul>
-                            <li>
-                              <span>
-                                <BsCircleFill size={5} />
-                              </span>
-                              File should be of maximum 2 MB
-                            </li>
-                            <li>
-                              <span>
-                                <BsCircleFill size={5} />
-                              </span>
-                              File should be uploaded in pdf, jpg, png format
-                              only
-                            </li>
-                          </ul>
-                        </div>
-                      }
+                      />
                     </div>
-                  ) : (
-                    <div className={styless.file_upload}>
-                      <Tooltip
-                        title="You have already uploaded file, Please Remove and upload"
-                        followCursor
+                  </div>
+                  {/* comp address */}
+                  <div className={styles.input_group}>
+                    <div className={styles.label}>
+                      <label>
+                        Company Registered Address
+                        <span className={styles.required}>Required</span>
+                      </label>
+                    </div>
+                    <div className={styles.inputs}>
+                      <input
+                        type="text"
+                        placeholder="Street Address"
+                        className={styles.input}
+                        value={
+                          vendor_entityInfo?.legal_entity?.company_address1
+                        }
+                        onChange={(e) => {
+                          setvendor_entityInfo({
+                            ...vendor_entityInfo,
+                            legal_entity: {
+                              ...vendor_entityInfo?.legal_entity,
+                              company_address1: e.target.value,
+                            },
+                          });
+                        }}
+                        required
+                      />
+                      <input
+                        type="text"
+                        placeholder="Street Address 2 (If Necessary)"
+                        className={styles.input}
+                        value={
+                          vendor_entityInfo?.legal_entity?.company_address2
+                        }
+                        onChange={(e) => {
+                          setvendor_entityInfo({
+                            ...vendor_entityInfo,
+                            legal_entity: {
+                              ...vendor_entityInfo?.legal_entity,
+                              company_address2: e.target.value,
+                            },
+                          });
+                        }}
+                      />
+                      <label>City</label>
+                      <select
+                        placeholder="Your City"
+                        value={vendor_entityInfo?.legal_entity?.city}
+                        onChange={(e) => {
+                          setvendor_entityInfo({
+                            ...vendor_entityInfo,
+                            legal_entity: {
+                              ...vendor_entityInfo?.legal_entity,
+                              city: e.target.value,
+                            },
+                          });
+                        }}
                       >
-                        <label className={styless.icon} htmlFor="fileIcon">
-                          <AiOutlineFileAdd
-                            style={iconStylesDisabled}
-                            size={60}
+                        <option>Mumbai</option>
+                        <option>Delhi</option>
+                        <option>Bangalore</option>
+                      </select>
+                      <div className={styles.code_country}>
+                        <div className={styles.zip_code}>
+                          <label>Zip Code</label>
+                          <input
+                            type="number"
+                            className={styles.code_input}
+                            value={vendor_entityInfo?.legal_entity?.zip_code}
+                            onChange={(e) => {
+                              setvendor_entityInfo({
+                                ...vendor_entityInfo,
+                                legal_entity: {
+                                  ...vendor_entityInfo?.legal_entity,
+                                  zip_code: e.target.value,
+                                },
+                              });
+                            }}
                           />
-                        </label>
-                      </Tooltip>
-
-                      <input type="file" id="fileIcon" disabled hidden></input>
-
-                      {
-                        <div className={styless.warning}>
-                          <ul>
-                            <li
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                flexDirection: "row",
-                              }}
-                            >
-                              <a href={taxcert?.url}>{taxcert?.name}</a>
-
-                              {!taxcert ? (
-                                <></>
-                              ) : (
-                                <TiDelete
-                                  size={20}
-                                  color="red"
-                                  onClick={() =>
-                                    deleteFileFromStorage(taxcertref)
-                                  }
-                                />
-                              )}
-
-                              {showProgress && <CircularProgress />}
-                            </li>
-                          </ul>
                         </div>
-                      }
+                        <div className={styles.country}>
+                          <label>Country</label>
+                          <select
+                            value={vendor_entityInfo?.legal_entity?.country}
+                            onChange={(e) => {
+                              setvendor_entityInfo({
+                                ...vendor_entityInfo,
+                                legal_entity: {
+                                  ...vendor_entityInfo?.legal_entity,
+                                  country: e.target.value,
+                                },
+                              });
+                            }}
+                          >
+                            <option>India</option>
+                            <option>USA</option>
+                            <option>Japan</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
-                  )}
-                </div>
-                {/* employees */}
-                <div className={styles.input_group}>
-                  <div className={styles.label}>
-                    <label>
-                      How many employees do you have?
-                      <span className={styles.required}>Required</span>
-                    </label>
-                  </div>
-                  <div className={styles.inputs}>
-                    <select
-                      value={vendor_entityInfo?.legal_entity?.employees}
-                      onChange={(e) => {
-                        setvendor_entityInfo({
-                          ...vendor_entityInfo,
-                          legal_entity: {
-                            ...vendor_entityInfo?.legal_entity,
-                            employees: e.target.value,
-                          },
-                        });
-                      }}
-                      required
-                    >
-                      <option>1-15 Employees</option>
-                      <option>15-60 Employees</option>
-                      <option>60-100 Employees</option>
-                      <option>100-1000 Employees</option>
-                      <option>1000-10,000 Employees</option>
-                    </select>
-                  </div>
-                </div>
-                {/* comp start date */}
-                <div className={styles.input_group}>
-                  <div className={styles.label}>
-                    <label>
-                      Company Start Date
-                      <span className={styles.required}>Required</span>
-                    </label>
-                  </div>
-                  <div className={styles.inputs}>
                     <input
-                      type="date"
-                      className={styles.input}
-                      value={vendor_entityInfo?.legal_entity?.start_date
-                        ?.toDate()
-                        .toLocaleDateString("en-CA")}
+                      type="checkbox"
+                      className={styles.check_input}
+                      checked={vendor_entityInfo?.legal_entity?.billing_address}
                       onChange={(e) => {
                         setvendor_entityInfo({
                           ...vendor_entityInfo,
                           legal_entity: {
                             ...vendor_entityInfo?.legal_entity,
-                            start_date: Timestamp.fromDate(
-                              new Date(e.target.value)
-                            ),
+                            billing_address: e.target.checked,
                           },
                         });
                       }}
-                      required
                     />
+                    <span className={styles.check}>
+                      <i>Billing address is same as shipping</i>
+                    </span>
                   </div>
-                </div>
-                <div className={styles.next}>
-                  {/* <Link to="/vendor-business-info"> */}
-                  <button className={styles.btnNext} type="submit">
-                    NEXT
-                  </button>
-                  {/* </Link> */}
-                </div>
-              </form>
+                  {/* comp reg no */}
+                  <div className={styles.input_group}>
+                    <div className={styles.label}>
+                      <label>
+                        Company Registeration No.
+                        <span className={styles.required}>Required</span>
+                      </label>
+                    </div>
+                    <div className={styles.inputs}>
+                      <input
+                        type="text"
+                        placeholder="Ontario"
+                        className={styles.input}
+                        value={vendor_entityInfo?.legal_entity?.regno}
+                        onChange={(e) => {
+                          setvendor_entityInfo({
+                            ...vendor_entityInfo,
+                            legal_entity: {
+                              ...vendor_entityInfo?.legal_entity,
+                              regno: e.target.value,
+                            },
+                          });
+                        }}
+                        required
+                      />
+                    </div>
+                  </div>
+                  {/* tax id */}
+                  <div className={styles.input_group}>
+                    <div className={styles.label}>
+                      <label>
+                        Tax ID Certificate
+                        <span className={styles.required}>Required</span>
+                      </label>
+                    </div>
+                    {!taxcert ? (
+                      <div className={styless.file_upload}>
+                        <label className={styless.icon} htmlFor="fileIcon">
+                          <AiOutlineFileAdd style={iconStyles} size={60} />
+                        </label>
+
+                        <input
+                          type="file"
+                          id="fileIcon"
+                          ref={tax_id_certi_Ref}
+                          onChange={(e) => {
+                            setvendor_entityInfo({
+                              ...vendor_entityInfo,
+                              legal_entity: {
+                                ...vendor_entityInfo?.legal_entity,
+                                taxFile: e.target.files[0],
+                              },
+                            });
+                            <a href="">{taxcert}</a>;
+                          }}
+                          required
+                        ></input>
+                        {
+                          <div className={styless.warning}>
+                            <ul>
+                              <li>
+                                <span>
+                                  <BsCircleFill size={5} />
+                                </span>
+                                File should be of maximum 2 MB
+                              </li>
+                              <li>
+                                <span>
+                                  <BsCircleFill size={5} />
+                                </span>
+                                File should be uploaded in pdf, jpg, png format
+                                only
+                              </li>
+                            </ul>
+                          </div>
+                        }
+                      </div>
+                    ) : (
+                      <div className={styless.file_upload}>
+                        <Tooltip
+                          title="You have already uploaded file, Please Remove and upload"
+                          followCursor
+                        >
+                          <label className={styless.icon} htmlFor="fileIcon">
+                            <AiOutlineFileAdd
+                              style={iconStylesDisabled}
+                              size={60}
+                            />
+                          </label>
+                        </Tooltip>
+
+                        <input
+                          type="file"
+                          id="fileIcon"
+                          disabled
+                          hidden
+                        ></input>
+
+                        {
+                          <div className={styless.warning}>
+                            <ul>
+                              <li
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  flexDirection: "row",
+                                }}
+                              >
+                                <a href={taxcert?.url}>{taxcert?.name}</a>
+
+                                {!taxcert ? (
+                                  <></>
+                                ) : (
+                                  <TiDelete
+                                    size={20}
+                                    color="red"
+                                    onClick={() =>
+                                      deleteFileFromStorage(taxcertref)
+                                    }
+                                  />
+                                )}
+
+                                {showProgress && <CircularProgress />}
+                              </li>
+                            </ul>
+                          </div>
+                        }
+                      </div>
+                    )}
+                  </div>
+                  {/* employees */}
+                  <div className={styles.input_group}>
+                    <div className={styles.label}>
+                      <label>
+                        How many employees do you have?
+                        <span className={styles.required}>Required</span>
+                      </label>
+                    </div>
+                    <div className={styles.inputs}>
+                      <select
+                        value={vendor_entityInfo?.legal_entity?.employees}
+                        onChange={(e) => {
+                          setvendor_entityInfo({
+                            ...vendor_entityInfo,
+                            legal_entity: {
+                              ...vendor_entityInfo?.legal_entity,
+                              employees: e.target.value,
+                            },
+                          });
+                        }}
+                        required
+                      >
+                        <option>1-15 Employees</option>
+                        <option>15-60 Employees</option>
+                        <option>60-100 Employees</option>
+                        <option>100-1000 Employees</option>
+                        <option>1000-10,000 Employees</option>
+                      </select>
+                    </div>
+                  </div>
+                  {/* comp start date */}
+                  <div className={styles.input_group}>
+                    <div className={styles.label}>
+                      <label>
+                        Company Start Date
+                        <span className={styles.required}>Required</span>
+                      </label>
+                    </div>
+                    <div className={styles.inputs}>
+                      <input
+                        type="date"
+                        className={styles.input}
+                        value={vendor_entityInfo?.legal_entity?.start_date
+                          ?.toDate()
+                          .toLocaleDateString("en-CA")}
+                        onChange={(e) => {
+                          setvendor_entityInfo({
+                            ...vendor_entityInfo,
+                            legal_entity: {
+                              ...vendor_entityInfo?.legal_entity,
+                              start_date: Timestamp.fromDate(
+                                new Date(e.target.value)
+                              ),
+                            },
+                          });
+                        }}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className={styles.next}>
+                    {/* <Link to="/vendor-business-info"> */}
+                    <button className={styles.btnNext} type="submit">
+                      NEXT
+                    </button>
+                    {/* </Link> */}
+                  </div>
+                </form>
+              </div>
             </div>
-          </div>
-        </section>
-      </div>
+          </section>
+        </div>
+      ) : (
+        <>
+          <Error />
+        </>
+      )}
     </>
   );
 };

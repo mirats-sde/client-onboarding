@@ -449,7 +449,9 @@ const VendorSalesAccountsInfo = () => {
     )
       .then(() => {
         // console.log("data updated successfully");
-        // history.push(``)
+        history.push(
+          `/vendor-quality-checks/registration-attributes/${id}/${sid}`
+        );
       })
       .catch((er) => {
         // console.log("error", er);

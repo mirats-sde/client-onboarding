@@ -9,6 +9,9 @@ import VendorSalesAccountsInfo from "./pages/vendor-sales-accounts/VendorSalesAc
 // import DocumentsLinks from "./pages/documents-links/DocumentsLinks"
 import VendorDocumentsLinks from "./pages/vendor-documents-links/VendorDocumentLinks";
 import { doc, getDoc } from "firebase/firestore";
+import VendorBusinessModel from "./pages/vendor-business-model/VendorBusinessModel";
+import VendorQualityChecks from "./pages/vendor-quality-checks/VendorQualityChecks";
+import Error from "./components/error/Error";
 import {
   BrowserRouter as Router,
   Switch,
@@ -69,6 +72,18 @@ function App() {
 
         <Route path="/vendor-sales-accounts/:id/:sid">
           <VendorSalesAccountsInfo />
+        </Route>
+
+        <Route path="/vendor-quality-checks/:questionType/:id/:sid" exact>
+          <VendorQualityChecks />
+        </Route>
+
+        <Route path="/vendor-business-model/:questionType/:id/:sid" exact>
+          <VendorBusinessModel />
+        </Route>
+
+        <Route path="/error">
+          <Error />
         </Route>
       </Switch>
     </Router>

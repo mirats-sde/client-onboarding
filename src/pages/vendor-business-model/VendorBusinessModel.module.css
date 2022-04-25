@@ -1,0 +1,129 @@
+.vendor_onboarding {
+  margin-top: 5em;
+  margin-bottom: 3em;
+}
+
+.flex {
+  display: flex;
+}
+
+.left_pages {
+  width: 25%;
+  background-color: #f6f6f6;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.12);
+  border-radius: 28px;
+  /* height: 100vh; */
+  padding: 60px 40px;
+  /* border: 1px solid red; */
+  /* position: relative; */
+}
+
+/* .left_pages {
+  width: 18%;
+  background-color: #f6f6f6;
+  box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.12);
+  border-radius: 28px;
+  height: 100%;
+  padding: 60px 100px;
+} */
+
+.pages {
+  /* width: 60%; */
+  /* margin: 50px 20px; */
+  margin: 50px 0px;
+  position: relative;
+  z-index: 1;
+  padding-bottom: 20px;
+}
+
+.light {
+  font-weight: bold;
+  font-size: 20px;
+  line-height: 30px;
+  color: #7e7878;
+}
+
+.active {
+  color: #7b61ff;
+}
+
+.questions {
+  width: 750px;
+  background: #ffffff;
+  box-shadow: 4px 4px 15px rgba(0, 0, 0, 0.13);
+  border-radius: 33px;
+  position: absolute;
+  left: 20em;
+  right: 150px;
+  height: 100%;
+  margin: 20px 0px;
+  padding: 30px 0px 40px 100px;
+}
+
+.circle {
+  display: block;
+  position: absolute;
+  top: -10px;
+  /* left: 160px; */
+  left: 240px;
+  right: 0px;
+  z-index: 100;
+  width: 60px;
+  height: 60px;
+  background: #7e7878;
+  border-radius: 50%;
+  line-height: 100px;
+}
+.active_circle {
+  background-color: #7b61ff;
+  /* background-color: #725ac2; */
+}
+
+.text_progress {
+  display: flex;
+  justify-content: space-between;
+  width: 55vw;
+}
+
+.vendor_text {
+  margin-left: 30px;
+  line-height: 30px;
+}
+
+.vendor_text span {
+  color: #bebbbb;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.onboarding_process {
+  margin-top: 40px;
+}
+/* buttons */
+.btns {
+  position: absolute;
+  bottom: -230px;
+  right: 130px;
+  text-align: right;
+  display: flex;
+}
+
+.btns button {
+  padding: 10px 30px;
+  border: none;
+  font-size: 18px;
+  border-radius: 5px;
+  letter-spacing: 0.065em;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.btnBack {
+  color: #7b61ff;
+  margin-right: 15px;
+}
+
+.btnNext {
+  color: white;
+  background-color: #7b61ff;
+}

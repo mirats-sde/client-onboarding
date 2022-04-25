@@ -17,6 +17,7 @@ import {
   ref,
   uploadBytesResumable,
 } from "firebase/storage";
+import Error from "../../components/error/Error";
 
 import Tooltip from "@mui/material/Tooltip";
 // import styless from "./FileUpload.module.css";
@@ -128,6 +129,8 @@ const DocumentsLinks = () => {
     if (querySnapshot.docs.length != 0) {
       setFlag(true);
       setDocumentInfo(querySnapshot.docs[0].data());
+    } else {
+      setDocumentInfo();
     }
   }
 
@@ -323,375 +326,392 @@ const DocumentsLinks = () => {
 
   return (
     <>
-      {/* <Header/> */}
-      <div className={styles.onboarding}>
-        <div className={styles.logo}>
-          <img src={logo} alt="logo" />
-        </div>
-        <ProgressBar progress="75" />
-        <div className={styles.onboarding_text}>
-          <h1>Client Onboarding</h1>
-          <p>Key step to understand your expectations</p>
-        </div>
-        <section className={styles.text_form}>
-          <div className={styles.left_text}>
-            <h1>Document & Company's Link</h1>
-            <p>This information will be visible all across our console</p>
-
-            <div className={styles.inputHelperCard}>
-              {helperCardData.map((data) => (
-                <InputHelperCard
-                  helperTitle={data.helperTitle}
-                  helperDesc={data.helperDesc}
-                  helperLogo={data.helperLogo}
-                />
-              ))}
-            </div>
+      {documentInfo != undefined ? (
+        <div className={styles.onboarding}>
+          <div className={styles.logo}>
+            <img src={logo} alt="logo" />
           </div>
-          <div className={styles.right_form}>
-            <div className={styles.document_link}>
-              <form onSubmit={handleFormSubmit}>
-                <div className={styles.form_inputs}>
-                  {/* panel book */}
-                  <label>
-                    Panel Book <small>(Please attach Or Provide Link)</small>{" "}
-                    <span className={styles.required}>Required</span>
-                  </label>
-                  {/* <FileUpload type={"panelbook"} id={id}/> */}
-                  {/* File uploader  */}
-                  {!panelFile &&
-                  !documentInfo?.documents_info?.PanelBook_url ? (
-                    <div className={styless.file_upload}>
-                      <label className={styless.icon} htmlFor="fileIcon">
-                        <AiOutlineFileAdd style={iconStyles} size={60} />
-                      </label>
+          <ProgressBar progress="75" />
+          <div className={styles.onboarding_text}>
+            <h1>Client Onboarding</h1>
+            <p>Key step to understand your expectations</p>
+          </div>
+          <section className={styles.text_form}>
+            <div className={styles.left_text}>
+              <h1>Document & Company's Link</h1>
+              <p>This information will be visible all across our console</p>
 
-                      <input
-                        type="file"
-                        // id="fileIcon"
-                        ref={panel_ref}
-                        onChange={(e) => {
-                          setDocumentInfo({
-                            ...documentInfo,
-                            documents_info: {
-                              ...documentInfo?.documents_info,
-                              panelFile: e.target.files[0],
-                            },
-                          });
-                          <a href="">{panelFile}</a>;
-                        }}
-
-                        // <a href="">{panelFile?.name}</a>;
-                      ></input>
-                      {
-                        <div className={styless.warning}>
-                          <ul>
-                            <li>
-                              <span>
-                                <BsCircleFill size={5} />
-                              </span>
-                              File should be of maximum 2 MB
-                            </li>
-                            <li>
-                              <span>
-                                <BsCircleFill size={5} />
-                              </span>
-                              File should be uploaded in pdf, jpg, png format
-                              only
-                            </li>
-                          </ul>
-                        </div>
-                      }
-                    </div>
-                  ) : (
-                    <div className={styless.file_upload}>
-                      <Tooltip
-                        title="You have already uploaded file, Please Remove and upload"
-                        followCursor
-                      >
-                        <label className={styless.icon} htmlFor="fileIcon">
-                          <AiOutlineFileAdd
-                            style={iconStylesDisabled}
-                            size={60}
-                          />
-                        </label>
-                      </Tooltip>
-
-                      <input type="file" id="fileIcon" disabled hidden></input>
-
-                      {
-                        <div className={styless.warning}>
-                          <ul>
-                            <li
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                flexDirection: "row",
-                              }}
-                            >
-                              <a href={panelFile?.url}>{panelFile?.name}</a>
-
-                              {!panelFile ? (
-                                <></>
-                              ) : (
-                                // <TiDelete size={20} hidden />
-                                <TiDelete
-                                  size={20}
-                                  color="red"
-                                  onClick={() =>
-                                    DeletePanelFileFromStorage(panelBookRef)
-                                  }
-                                />
-                              )}
-
-                              {showPanelProgress && <CircularProgress />}
-                            </li>
-                          </ul>
-                        </div>
-                      }
-                    </div>
-                  )}
-
-                  <div className={styles.mid_text}>Or</div>
-
-                  {!panelFile ? (
-                    <div className={styles.input_url}>
-                      <span>
-                        <FiLink2 size={30} />
-                      </span>
-                      <input
-                        type="url"
-                        placeholder="Paste The Link Here"
-                        className={styles.url}
-                        value={documentInfo?.documents_info?.PanelBook_url}
-                        onChange={(e) => {
-                          setDocumentInfo({
-                            ...documentInfo,
-                            documents_info: {
-                              ...documentInfo?.documents_info,
-                              PanelBook_url: e.target.value,
-                            },
-                          });
-                        }}
-                      ></input>
-                      <div></div>
-                    </div>
-                  ) : (
-                    <div className={styles.input_url}>
-                      <span>
-                        <FiLink2 size={30} />
-                      </span>
-                      <input
-                        type="url"
-                        placeholder="Paste The Link Here"
-                        className={styles.url}
-                        disabled
-                      ></input>
-                      <div></div>
-                    </div>
-                  )}
-
-                  {/* esmoar */}
-                  <label>
-                    ESOMAR <small>(Please attach Or Provide Link)</small>{" "}
-                    <span className={styles.required}>Required</span>
-                  </label>
-                  {/* <FileUpload /> */}
-                  {!esomarFile && !documentInfo?.documents_info?.ESOMAR_url ? (
-                    <div className={styless.file_upload}>
-                      <label className={styless.icon} htmlFor="fileIcon">
-                        <AiOutlineFileAdd style={iconStyles} size={60} />
-                      </label>
-                      <input
-                        type="file"
-                        id="fileIcon"
-                        ref={esomar_ref}
-                        // ref={ESOMARRef}
-                        onChange={(e) => {
-                          setDocumentInfo({
-                            ...documentInfo,
-                            documents_info: {
-                              ...documentInfo?.documents_info,
-                              esomarFile: e.target.files[0],
-                            },
-                          });
-                          <a href="">{esomarFile}</a>;
-                        }}
-                        // hidden
-                      ></input>
-                      {
-                        <div className={styless.warning}>
-                          <ul>
-                            <li>
-                              <span>
-                                <BsCircleFill size={5} />
-                              </span>
-                              File should be of maximum 2 MB
-                            </li>
-                            <li>
-                              <span>
-                                <BsCircleFill size={5} />
-                              </span>
-                              File should be uploaded in pdf, jpg, png format
-                              only
-                            </li>
-                          </ul>
-                        </div>
-                      }
-                    </div>
-                  ) : (
-                    <div className={styless.file_upload}>
-                      <Tooltip
-                        title="You have already uploaded file, Please Remove and upload"
-                        followCursor
-                      >
-                        <label className={styless.icon} htmlFor="fileIcon">
-                          <AiOutlineFileAdd
-                            style={iconStylesDisabled}
-                            size={60}
-                          />
-                        </label>
-                      </Tooltip>
-
-                      <input type="file" id="fileIcon" disabled hidden></input>
-
-                      {
-                        <div className={styless.warning}>
-                          <ul>
-                            <li
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                flexDirection: "row",
-                              }}
-                            >
-                              <a href={esomarFile?.url}>{esomarFile?.name}</a>
-                              {!esomarFile ? (
-                                <></>
-                              ) : (
-                                // <TiDelete size={20} hidden />
-                                <TiDelete
-                                  size={20}
-                                  onClick={() =>
-                                    DeleteESOMARFileFromStorage(ESOMARRef)
-                                  }
-                                />
-                              )}
-                              {showESOMARProgress && <CircularProgress />}
-                            </li>
-                          </ul>
-                        </div>
-                      }
-                    </div>
-                  )}
-
-                  <div className={styles.mid_text}>Or</div>
-
-                  {!esomarFile ? (
-                    <div className={styles.input_url}>
-                      <span>
-                        <FiLink2 size={30} />
-                      </span>
-                      <input
-                        type="url"
-                        placeholder="Paste The Link Here"
-                        className={styles.url}
-                        value={documentInfo?.documents_info?.ESOMAR_url}
-                        onChange={(e) => {
-                          setDocumentInfo({
-                            ...documentInfo,
-                            documents_info: {
-                              ...documentInfo?.documents_info,
-                              ESOMAR_url: e.target.value,
-                            },
-                          });
-                        }}
-                      ></input>
-                    </div>
-                  ) : (
-                    <div className={styles.input_url}>
-                      <span>
-                        <FiLink2 size={30} />
-                      </span>
-                      <input
-                        type="url"
-                        placeholder="Paste The Link Here"
-                        className={styles.url}
-                        disabled
-                      ></input>
-                    </div>
-                  )}
-
-                  {/* esomar profile link */}
-                  <div className={styles.profile_link}>
+              <div className={styles.inputHelperCard}>
+                {helperCardData.map((data) => (
+                  <InputHelperCard
+                    helperTitle={data.helperTitle}
+                    helperDesc={data.helperDesc}
+                    helperLogo={data.helperLogo}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className={styles.right_form}>
+              <div className={styles.document_link}>
+                <form onSubmit={handleFormSubmit}>
+                  <div className={styles.form_inputs}>
+                    {/* panel book */}
                     <label>
-                      ESOMAR Profile Link/URL
-                      <span className={styles.optional}>optional</span>
+                      Panel Book <small>(Please attach Or Provide Link)</small>{" "}
+                      <span className={styles.required}>Required</span>
                     </label>
+                    {/* <FileUpload type={"panelbook"} id={id}/> */}
+                    {/* File uploader  */}
+                    {!panelFile &&
+                    !documentInfo?.documents_info?.PanelBook_url ? (
+                      <div className={styless.file_upload}>
+                        <label className={styless.icon} htmlFor="fileIcon">
+                          <AiOutlineFileAdd style={iconStyles} size={60} />
+                        </label>
 
-                    <div className={styles.input_url}>
-                      <span>
-                        <FiLink2 size={30} />
-                      </span>
-                      <input
-                        type="url"
-                        placeholder="Paste The Link Here"
-                        className={styles.url}
-                        value={
-                          documentInfo?.documents_info?.ESOMAR_Profile_Link
+                        <input
+                          type="file"
+                          // id="fileIcon"
+                          ref={panel_ref}
+                          onChange={(e) => {
+                            setDocumentInfo({
+                              ...documentInfo,
+                              documents_info: {
+                                ...documentInfo?.documents_info,
+                                panelFile: e.target.files[0],
+                              },
+                            });
+                            <a href="">{panelFile}</a>;
+                          }}
+
+                          // <a href="">{panelFile?.name}</a>;
+                        ></input>
+                        {
+                          <div className={styless.warning}>
+                            <ul>
+                              <li>
+                                <span>
+                                  <BsCircleFill size={5} />
+                                </span>
+                                File should be of maximum 2 MB
+                              </li>
+                              <li>
+                                <span>
+                                  <BsCircleFill size={5} />
+                                </span>
+                                File should be uploaded in pdf, jpg, png format
+                                only
+                              </li>
+                            </ul>
+                          </div>
                         }
-                        onChange={(e) => {
-                          setDocumentInfo({
-                            ...documentInfo,
-                            documents_info: {
-                              ...documentInfo?.documents_info,
-                              ESOMAR_Profile_Link: e.target.value,
-                            },
-                          });
-                        }}
-                      ></input>
-                    </div>
-                  </div>
-                  {/* esomar profile url */}
-                  <div className={styles.profile_url}>
+                      </div>
+                    ) : (
+                      <div className={styless.file_upload}>
+                        <Tooltip
+                          title="You have already uploaded file, Please Remove and upload"
+                          followCursor
+                        >
+                          <label className={styless.icon} htmlFor="fileIcon">
+                            <AiOutlineFileAdd
+                              style={iconStylesDisabled}
+                              size={60}
+                            />
+                          </label>
+                        </Tooltip>
+
+                        <input
+                          type="file"
+                          id="fileIcon"
+                          disabled
+                          hidden
+                        ></input>
+
+                        {
+                          <div className={styless.warning}>
+                            <ul>
+                              <li
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  flexDirection: "row",
+                                }}
+                              >
+                                <a href={panelFile?.url}>{panelFile?.name}</a>
+
+                                {!panelFile ? (
+                                  <></>
+                                ) : (
+                                  // <TiDelete size={20} hidden />
+                                  <TiDelete
+                                    size={20}
+                                    color="red"
+                                    onClick={() =>
+                                      DeletePanelFileFromStorage(panelBookRef)
+                                    }
+                                  />
+                                )}
+
+                                {showPanelProgress && <CircularProgress />}
+                              </li>
+                            </ul>
+                          </div>
+                        }
+                      </div>
+                    )}
+
+                    <div className={styles.mid_text}>Or</div>
+
+                    {!panelFile ? (
+                      <div className={styles.input_url}>
+                        <span>
+                          <FiLink2 size={30} />
+                        </span>
+                        <input
+                          type="url"
+                          placeholder="Paste The Link Here"
+                          className={styles.url}
+                          value={documentInfo?.documents_info?.PanelBook_url}
+                          onChange={(e) => {
+                            setDocumentInfo({
+                              ...documentInfo,
+                              documents_info: {
+                                ...documentInfo?.documents_info,
+                                PanelBook_url: e.target.value,
+                              },
+                            });
+                          }}
+                        ></input>
+                        <div></div>
+                      </div>
+                    ) : (
+                      <div className={styles.input_url}>
+                        <span>
+                          <FiLink2 size={30} />
+                        </span>
+                        <input
+                          type="url"
+                          placeholder="Paste The Link Here"
+                          className={styles.url}
+                          disabled
+                        ></input>
+                        <div></div>
+                      </div>
+                    )}
+
+                    {/* esmoar */}
                     <label>
-                      Linkedin Profile URL{" "}
-                      <span className={styles.optional}>optional</span>
+                      ESOMAR <small>(Please attach Or Provide Link)</small>{" "}
+                      <span className={styles.required}>Required</span>
                     </label>
-                    <div className={styles.input_url}>
-                      <span>
-                        <FiLink2 size={30} />
-                      </span>
-                      <input
-                        type="url"
-                        placeholder="Paste The Link Here"
-                        className={styles.url}
-                        value={documentInfo?.documents_info?.linkedin_profile}
-                        onChange={(e) => {
-                          setDocumentInfo({
-                            ...documentInfo,
-                            documents_info: {
-                              ...documentInfo?.documents_info,
-                              linkedin_profile: e.target.value,
-                            },
-                          });
-                        }}
-                      ></input>
+                    {/* <FileUpload /> */}
+                    {!esomarFile &&
+                    !documentInfo?.documents_info?.ESOMAR_url ? (
+                      <div className={styless.file_upload}>
+                        <label className={styless.icon} htmlFor="fileIcon">
+                          <AiOutlineFileAdd style={iconStyles} size={60} />
+                        </label>
+                        <input
+                          type="file"
+                          id="fileIcon"
+                          ref={esomar_ref}
+                          // ref={ESOMARRef}
+                          onChange={(e) => {
+                            setDocumentInfo({
+                              ...documentInfo,
+                              documents_info: {
+                                ...documentInfo?.documents_info,
+                                esomarFile: e.target.files[0],
+                              },
+                            });
+                            <a href="">{esomarFile}</a>;
+                          }}
+                          // hidden
+                        ></input>
+                        {
+                          <div className={styless.warning}>
+                            <ul>
+                              <li>
+                                <span>
+                                  <BsCircleFill size={5} />
+                                </span>
+                                File should be of maximum 2 MB
+                              </li>
+                              <li>
+                                <span>
+                                  <BsCircleFill size={5} />
+                                </span>
+                                File should be uploaded in pdf, jpg, png format
+                                only
+                              </li>
+                            </ul>
+                          </div>
+                        }
+                      </div>
+                    ) : (
+                      <div className={styless.file_upload}>
+                        <Tooltip
+                          title="You have already uploaded file, Please Remove and upload"
+                          followCursor
+                        >
+                          <label className={styless.icon} htmlFor="fileIcon">
+                            <AiOutlineFileAdd
+                              style={iconStylesDisabled}
+                              size={60}
+                            />
+                          </label>
+                        </Tooltip>
+
+                        <input
+                          type="file"
+                          id="fileIcon"
+                          disabled
+                          hidden
+                        ></input>
+
+                        {
+                          <div className={styless.warning}>
+                            <ul>
+                              <li
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  flexDirection: "row",
+                                }}
+                              >
+                                <a href={esomarFile?.url}>{esomarFile?.name}</a>
+                                {!esomarFile ? (
+                                  <></>
+                                ) : (
+                                  // <TiDelete size={20} hidden />
+                                  <TiDelete
+                                    size={20}
+                                    onClick={() =>
+                                      DeleteESOMARFileFromStorage(ESOMARRef)
+                                    }
+                                  />
+                                )}
+                                {showESOMARProgress && <CircularProgress />}
+                              </li>
+                            </ul>
+                          </div>
+                        }
+                      </div>
+                    )}
+
+                    <div className={styles.mid_text}>Or</div>
+
+                    {!esomarFile ? (
+                      <div className={styles.input_url}>
+                        <span>
+                          <FiLink2 size={30} />
+                        </span>
+                        <input
+                          type="url"
+                          placeholder="Paste The Link Here"
+                          className={styles.url}
+                          value={documentInfo?.documents_info?.ESOMAR_url}
+                          onChange={(e) => {
+                            setDocumentInfo({
+                              ...documentInfo,
+                              documents_info: {
+                                ...documentInfo?.documents_info,
+                                ESOMAR_url: e.target.value,
+                              },
+                            });
+                          }}
+                        ></input>
+                      </div>
+                    ) : (
+                      <div className={styles.input_url}>
+                        <span>
+                          <FiLink2 size={30} />
+                        </span>
+                        <input
+                          type="url"
+                          placeholder="Paste The Link Here"
+                          className={styles.url}
+                          disabled
+                        ></input>
+                      </div>
+                    )}
+
+                    {/* esomar profile link */}
+                    <div className={styles.profile_link}>
+                      <label>
+                        ESOMAR Profile Link/URL
+                        <span className={styles.optional}>optional</span>
+                      </label>
+
+                      <div className={styles.input_url}>
+                        <span>
+                          <FiLink2 size={30} />
+                        </span>
+                        <input
+                          type="url"
+                          placeholder="Paste The Link Here"
+                          className={styles.url}
+                          value={
+                            documentInfo?.documents_info?.ESOMAR_Profile_Link
+                          }
+                          onChange={(e) => {
+                            setDocumentInfo({
+                              ...documentInfo,
+                              documents_info: {
+                                ...documentInfo?.documents_info,
+                                ESOMAR_Profile_Link: e.target.value,
+                              },
+                            });
+                          }}
+                        ></input>
+                      </div>
+                    </div>
+                    {/* esomar profile url */}
+                    <div className={styles.profile_url}>
+                      <label>
+                        Linkedin Profile URL{" "}
+                        <span className={styles.optional}>optional</span>
+                      </label>
+                      <div className={styles.input_url}>
+                        <span>
+                          <FiLink2 size={30} />
+                        </span>
+                        <input
+                          type="url"
+                          placeholder="Paste The Link Here"
+                          className={styles.url}
+                          value={documentInfo?.documents_info?.linkedin_profile}
+                          onChange={(e) => {
+                            setDocumentInfo({
+                              ...documentInfo,
+                              documents_info: {
+                                ...documentInfo?.documents_info,
+                                linkedin_profile: e.target.value,
+                              },
+                            });
+                          }}
+                        ></input>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className={styles.next}>
-                  {/* <Link to="/sales-accounts"> */}
-                  <button className={styles.btnNext} type="submit">
-                    NEXT
-                  </button>
-                  {/* </Link> */}
-                </div>
-              </form>
+                  <div className={styles.next}>
+                    {/* <Link to="/sales-accounts"> */}
+                    <button className={styles.btnNext} type="submit">
+                      NEXT
+                    </button>
+                    {/* </Link> */}
+                  </div>
+                </form>
+              </div>
             </div>
-          </div>
-        </section>
-      </div>
+          </section>
+        </div>
+      ) : (
+        <>
+          <Error />
+        </>
+      )}
+      {/* <Header/> */}
     </>
   );
 };
