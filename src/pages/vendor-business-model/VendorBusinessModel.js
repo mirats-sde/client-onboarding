@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { decode } from "@firebase/util";
 import { db } from "../../firebase-config";
 import Error from "../../components/error/Error";
+import Loader from "../loader/Loader";
 
 const left = [
   {
@@ -52,6 +53,7 @@ const VendorBusinessModel = () => {
   const [flag, setFlag] = useState(true);
   const { id } = useParams();
   const { sid } = useParams();
+  const [loading, setLoading] = useState(true);
 
   const Hashids = require("hashids/cjs");
   const hashids = new Hashids("client-vendor");
@@ -63,26 +65,30 @@ const VendorBusinessModel = () => {
     // console.log("checking ids");
     const Hashids = require("hashids/cjs");
     const hashids = new Hashids("client-vendor");
-    const q = query(
-      collection(db, "supply_partners"),
-      where("id", "==", decode_id[0]),
-      where("sid", "==", deocode_sid[0])
-    );
-    const querysnapshot = await getDocs(q);
-    if (querysnapshot.docs.length != 0) {
-      setFlag(true);
-      setRegattributes(querysnapshot.docs[0].data());
-    } else {
-      setRegattributes();
+    try {
+      const q = query(
+        collection(db, "supply_partners"),
+        where("id", "==", decode_id[0]),
+        where("sid", "==", deocode_sid[0])
+      );
+      const querysnapshot = await getDocs(q);
+      if (querysnapshot.docs.length != 0) {
+        setFlag(true);
+        setRegattributes(querysnapshot.docs[0].data());
+      } else {
+        setRegattributes();
+      }
+    } catch (err) {
+    } finally {
+      setLoading(false);
     }
   }
 
   useEffect(() => {
-    checkID(id, sid);
+    checkID(id, sid).then(() => {
+      setLoading(false);
+    });
   }, []);
-
-  // console.log(regattributes);
-  // console.log(decode_id[0]);
 
   //business model:
   const businessModel = [
@@ -205,12 +211,13 @@ const VendorBusinessModel = () => {
 
   return (
     <>
-      {regattributes != undefined ? (
+      {loading ? (
+        <Loader />
+      ) : regattributes ? (
         <div className={styles.vendor_onboarding}>
           <div className={styles.flex}>
             <div className={styles.left_pages}>
               {left.map((l) => {
-                // console.log(questionType === l?.value);
                 return (
                   <div className={styles.pages}>
                     <h2
@@ -315,46 +322,19 @@ const VendorBusinessModel = () => {
                 })()}
               </div>
               {/* buttons */}
-              {/* <div className={styles.btns}>
-              <div className={styles.back}>
-                {businessModelQues.map((businessQ, index) => {
-                  if (questionType === businessQ) {
-                    return (
-                      <Link
-                        to={`/vendor-business-model/${
-                          businessModelQues[index - 1]
-                        }/${id}/${sid}`}
-                      >
-                        <button className={styles.btnBack}>BACK</button>
-                      </Link>
-                    );
-                  }
-                })}
-              </div>
-              <div className={styles.next}>
-                {businessModelQues.map((businessQ, index) => {
-                  if (questionType === businessQ) {
-                    return (
-                      <Link
-                        to={`/vendor-business-model/${
-                          businessModelQues[index + 1]
-                        }/${id}/${sid}`}
-                      >
-                        <button className={styles.btnNext}>NEXT</button>
-                      </Link>
-                    );
-                  }
-                })}
-              </div>
-            </div> */}
             </div>
           </div>
         </div>
       ) : (
-        <>
-          <Error />
-        </>
+        <Error />
       )}
+      {/* {regattributes != undefined ? (
+       
+      ) : (
+        <>
+          */}
+      {/* </>
+      )} */}
     </>
   );
 };

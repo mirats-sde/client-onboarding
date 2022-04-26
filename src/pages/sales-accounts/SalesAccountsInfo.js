@@ -47,15 +47,10 @@ const SalesInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
   const [phoneNumber, setPhoneNumber] = useState("");
 
   //salesInfo:
-  useEffect(() => {
-    // console.log("in useEffect for sales info");
-    // console.log(SalesAccountsInfo);
-    // console.log(phoneNumber);
-  }, [SalesAccountsInfo]);
+  useEffect(() => {}, [SalesAccountsInfo]);
 
   //first id
   const { id } = useParams();
-  // const { id, sid } = useParams(id, sid);
 
   //second id
   const { sid } = useParams();
@@ -66,13 +61,6 @@ const SalesInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
   const hashids = new Hashids("client-vendor");
 
   let decode_sid = hashids.decode(sid);
-  // console.log("decoded sid=> ", decode_sid);
-
-  // let decod = hashids.encode(id);
-  // console.log(decod);
-
-  // let decodeid = hashids.encode(sid);
-  // console.log(decodeid);
 
   //check whether first id exists or not
   async function checkID(id, sid) {
@@ -90,22 +78,18 @@ const SalesInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
 
     const querySnapshot = await getDocs(q);
     if (querySnapshot.docs.length !== 0) {
-      // console.log("Entered this condition")
       setFlag(true);
       setSalesAccountsInfo(querySnapshot.docs[0].data());
     }
   }
 
   useEffect(() => {
-    // console.log("in useEffect", id);
     checkID(id, sid);
   }, [id]);
 
   useEffect(() => {
     if (flag) {
-      // console.log("id found");
     } else {
-      // console.log("id not found");
     }
   }, [flag]);
 
@@ -185,15 +169,6 @@ const SalesInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
                       },
                     });
                   }}
-                  // onChange={(e) => {
-                  //   setsalesInfo({
-                  //     ...salesInfo,
-                  //     sales_contact_info: {
-                  //       ...salesInfo?.sales_contact_info,
-                  //       mobile_no: e.target.value,
-                  //     },
-                  //   });
-                  // }}
                   containerStyle={{
                     width: "100%",
                     border: "1px solid #959393",
@@ -244,13 +219,9 @@ const SalesInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
 
 const AccountsInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
   const [phoneNumber, setPhoneNumber] = useState("");
-  // const [salesInfo, setsalesInfo] = useState();
 
   //accounts Info:
-  useEffect(() => {
-    // console.log("in useEffect for accounts info");
-    // console.log(SalesAccountsInfo);
-  }, [SalesAccountsInfo]);
+  useEffect(() => {}, [SalesAccountsInfo]);
 
   //first id
   const { id } = useParams();
@@ -263,13 +234,6 @@ const AccountsInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
   const Hashids = require("hashids/cjs");
   const hashids = new Hashids("client-vendor");
   let decode_sid = hashids.decode(sid);
-  // console.log("decoded sid=> ", decode_sid);
-
-  // let decod = hashids.encode(id);
-  // console.log(decod);
-
-  // let decodeid = hashids.encode(sid);
-  // console.log(decodeid);
 
   //check whether first id exists or not
   async function checkID(id, sid) {
@@ -287,22 +251,18 @@ const AccountsInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
 
     const querySnapshot = await getDocs(q);
     if (querySnapshot.docs.length !== 0) {
-      // console.log("Entered this condition")
       setFlag(true);
       setSalesAccountsInfo(querySnapshot.docs[0].data());
     }
   }
 
   useEffect(() => {
-    // console.log("in useEffect", id);
     checkID(id, sid);
   }, [id]);
 
   useEffect(() => {
     if (flag) {
-      // console.log("id found");
     } else {
-      // console.log("id not found");
     }
   }, [flag]);
 
@@ -434,35 +394,30 @@ const AccountsInfo = ({ SalesAccountsInfo, setSalesAccountsInfo }) => {
 
 const SalesAccountsInfo = () => {
   const history = useHistory();
-  // const [salesInfo, setsalesInfo] = useState();
+
   const [SalesAccountsInfo, setSalesAccountsInfo] = useState();
-  const [decode_id, setdecode_id] = useState();
+  const [loading, setLoading] = useState(true);
+
   const Hashids = require("hashids/cjs");
   const hashids = new Hashids("client-vendor");
 
   const { id, sid } = useParams();
-  // console.log(d_fid[0]);
 
   async function handleFormSubmit(e) {
     e.preventDefault();
-    // console.lo;
+
     //uploading information to the database:
     let d_fid = hashids.decode(id);
     let d_sid = hashids.decode(sid);
-    // console.log(salesInfo, d_fid[0]);
-    // console.log(accountsInfo, d_fid[0]);
 
     //sales info
     setDoc(doc(db, "Organisation", String(d_fid[0])), SalesAccountsInfo, {
       merge: true,
     })
       .then(() => {
-        // console.log("data updated successfully");
         history.push(`/vendor-onboarding/${id}/${sid}`);
       })
-      .catch((er) => {
-        // console.log("error", er);
-      });
+      .catch((er) => {});
   }
   return (
     <>
@@ -489,11 +444,9 @@ const SalesAccountsInfo = () => {
         />
 
         <div className={styles.next}>
-          {/* <Link to="/vendor-onboarding"> */}
           <button className={styles.btnNext} onClick={handleFormSubmit}>
             NEXT
           </button>
-          {/* </Link> */}
         </div>
       </div>
     </>

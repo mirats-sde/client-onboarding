@@ -10,6 +10,8 @@ import { db } from "../../firebase-config";
 import storage from "../../firebase-config";
 import { useParams } from "react-router-dom";
 import Hashids from "hashids";
+import Loader from "../loader/Loader";
+
 import {
   getDownloadURL,
   getStorage,
@@ -50,6 +52,7 @@ const BusinessInfo = () => {
   const history = useHistory();
   const [businessInfo, setbusinessInfo] = useState();
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [loading, setLoading] = useState(true);
 
   //business info:
   useEffect(() => {
@@ -66,53 +69,49 @@ const BusinessInfo = () => {
 
   const Hashids = require("hashids/cjs");
   const hashids = new Hashids("client-vendor");
-  // console.log(id);
-  // console.log(sid);
+
   let decode_id = hashids.decode(id);
-  // console.log("decoded id=>", decode_id);
+
   let decode_sid = hashids.decode(sid);
-  // console.log("decoded sid=>", decode_sid);
 
   let decod = hashids.encode(id);
-  // console.log(decod);
 
   let decodeid = hashids.encode(sid);
-  // console.log(decodeid);
 
   //check whether the id exists or not:
   async function checkID(id, sid) {
     const Hashids = require("hashids/cjs");
     const hashids = new Hashids("client-vendor");
 
-    // console.log(decode_id[0]);
-    // console.log(decode_sid[0]);
-    const q = query(
-      collection(db, "Organisation"),
-      where("id", "==", decode_id[0]),
-      where("sid", "==", decode_sid[0])
-    );
+    try {
+      const q = query(
+        collection(db, "Organisation"),
+        where("id", "==", decode_id[0]),
+        where("sid", "==", decode_sid[0])
+      );
 
-    const querySnapshot = await getDocs(q);
-    if (querySnapshot.docs.length != 0) {
-      setFlag(true);
-      setbusinessInfo(querySnapshot.docs[0].data());
-    } else {
-      setbusinessInfo();
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.docs.length != 0) {
+        setFlag(true);
+        setbusinessInfo(querySnapshot.docs[0].data());
+      } else {
+        setbusinessInfo();
+      }
+    } catch (err) {
+    } finally {
+      setLoading(false);
     }
   }
 
-  // console.log(businessInfo);
-
   useEffect(() => {
-    // console.log("in use effect", id);
-    checkID(id, sid);
+    checkID(id, sid).then(() => {
+      setLoading(false);
+    });
   }, []);
 
   useEffect(() => {
     if (flag) {
-      // console.log("id found");
     } else {
-      // console.log("id not found");
     }
   }, [flag]);
 
@@ -125,18 +124,17 @@ const BusinessInfo = () => {
       merge: true,
     })
       .then(() => {
-        // console.log("data updated successfully");
         history.push(`/documents-links/${id}/${sid}`);
       })
-      .catch((er) => {
-        // console.log("error", er);
-      });
+      .catch((er) => {});
   }
 
   return (
     <>
       {/* <Header/> */}
-      {businessInfo != undefined ? (
+      {loading ? (
+        <Loader />
+      ) : businessInfo ? (
         <div className={styles.onboarding}>
           <div className={styles.logo}>
             <img src={logo} alt="logo" />
@@ -364,7 +362,7 @@ const BusinessInfo = () => {
         </div>
       ) : (
         <>
-          <Error />
+          <Error />;
         </>
       )}
     </>

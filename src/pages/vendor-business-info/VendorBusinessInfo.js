@@ -23,8 +23,7 @@ import {
 } from "firebase/firestore";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import Error from "../../components/error/Error";
-
-// import 'react-phone-input-2/lib/material.css'
+import Loader from "../loader/Loader";
 
 const helperCardData = [
   {
@@ -40,11 +39,10 @@ const VendorBusinessInfo = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [vendor_businessInfo, setvendor_businessInfo] = useState();
   let [flag, setFlag] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   //vendor_entityInfo:
-  useEffect(() => {
-    // console.log(vendor_businessInfo);
-  }, [vendor_businessInfo]);
+  useEffect(() => {}, [vendor_businessInfo]);
 
   //first id:
   const { id } = useParams();
@@ -55,42 +53,42 @@ const VendorBusinessInfo = () => {
   const Hashids = require("hashids/cjs");
   const hashids = new Hashids("client-vendor");
   let decode_id = hashids.decode(id);
-  // console.log("decoded id=>", decode_id);
   let decode_sid = hashids.decode(sid);
-  // console.log("decoded sid=>", decode_sid);
 
   //check whether first id exists or not:
   async function checkID(id, sid) {
     const Hashids = require("hashids/cjs");
     const hashids = new Hashids("client-vendor");
 
-    // console.log(decode_id[0]);
-    // console.log(decode_sid[0]);
-    const q = query(
-      collection(db, "supply_partners"),
-      where("id", "==", decode_id[0]),
-      where("sid", "==", decode_sid[0])
-    );
+    try {
+      const q = query(
+        collection(db, "supply_partners"),
+        where("id", "==", decode_id[0]),
+        where("sid", "==", decode_sid[0])
+      );
 
-    const querySnapshot = await getDocs(q);
-    if (querySnapshot.docs.length !== 0) {
-      setFlag(true);
-      setvendor_businessInfo(querySnapshot.docs[0].data());
-    } else {
-      setvendor_businessInfo();
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.docs.length !== 0) {
+        setFlag(true);
+        setvendor_businessInfo(querySnapshot.docs[0].data());
+      } else {
+        setvendor_businessInfo();
+      }
+    } catch (err) {
+    } finally {
+      setLoading(false);
     }
   }
 
   useEffect(() => {
-    // console.log("in main useEffect");
-    checkID(id, sid);
+    checkID(id, sid).then(() => {
+      setLoading(false);
+    });
   }, []);
 
   useEffect(() => {
     if (flag) {
-      // console.log("id found");
     } else {
-      // console.log("id not found");
     }
   }, [flag]);
 
@@ -107,18 +105,17 @@ const VendorBusinessInfo = () => {
       }
     )
       .then(() => {
-        // console.log("data uploaded successfully!!!");
         history.push(`/vendor-documents-links/${id}/${sid}`);
       })
-      .catch((er) => {
-        // console.log("Error", er);
-      });
+      .catch((er) => {});
   }
 
   return (
     <>
       {/* <Header/> */}
-      {vendor_businessInfo != undefined ? (
+      {loading ? (
+        <Loader />
+      ) : vendor_businessInfo ? (
         <div className={styles.onboarding}>
           <div className={styles.logo}>
             <img src={logo} alt="logo" />

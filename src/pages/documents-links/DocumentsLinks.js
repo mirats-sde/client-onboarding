@@ -43,6 +43,7 @@ import {
 import { flexbox } from "@mui/system";
 import { DocumentScanner } from "@mui/icons-material";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import Loader from "../loader/Loader";
 
 const helperCardData = [
   {
@@ -61,6 +62,7 @@ const DocumentsLinks = () => {
   let iconStylesDisabled = { color: "gray" };
   let [showPanelProgress, setShowPanelProgress] = useState(false);
   let [showESOMARProgress, setshowESOMARProgress] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   //panel upload:
   const [panelFile, setpanelFile] = useState();
@@ -71,9 +73,7 @@ const DocumentsLinks = () => {
   const esomar_ref = useRef();
 
   //document
-  useEffect(() => {
-    // console.log(documentInfo);
-  }, [documentInfo]);
+  useEffect(() => {}, [documentInfo]);
 
   //first id:
   const { id } = useParams();
@@ -85,21 +85,8 @@ const DocumentsLinks = () => {
 
   const Hashids = require("hashids/cjs");
   const hashids = new Hashids("client-vendor");
-  // console.log(id);
-  // console.log(sid);
   let decode_id = hashids.decode(id);
-  // console.log("decoded id=>", decode_id);
   let decode_sid = hashids.decode(sid);
-  // console.log("decoded sid=>", decode_sid);
-
-  // let decod = hashids.encode(id);
-  // console.log(decod);
-
-  // let decodesid = hashids.encode(sid);
-  // console.log(decodesid);
-
-  // console.log(panel_ref);
-  // console.log(esomar_ref);
 
   //panel book reference:
   const panelBookRef = ref(
@@ -117,79 +104,62 @@ const DocumentsLinks = () => {
   async function checkID(id, sid) {
     const Hashids = require("hashids/cjs");
     const hashids = new Hashids("client-vendor");
-    // console.log(decode_id[0]);
-    // console.log(decode_sid[0]);
-    const q = query(
-      collection(db, "Organisation"),
-      where("id", "==", decode_id[0]),
-      where("sid", "==", decode_sid[0])
-    );
 
-    const querySnapshot = await getDocs(q);
-    if (querySnapshot.docs.length != 0) {
-      setFlag(true);
-      setDocumentInfo(querySnapshot.docs[0].data());
-    } else {
-      setDocumentInfo();
+    try {
+      const q = query(
+        collection(db, "Organisation"),
+        where("id", "==", decode_id[0]),
+        where("sid", "==", decode_sid[0])
+      );
+
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.docs.length != 0) {
+        setFlag(true);
+        setDocumentInfo(querySnapshot.docs[0].data());
+      } else {
+        setDocumentInfo();
+      }
+    } catch (err) {
+    } finally {
+      setLoading(false);
     }
   }
 
   const DeletePanelFileFromStorage = (storageRef) => {
-    // console.log("Deleting file");
     listAll(storageRef).then((res) => {
-      // console
-      // console.log(res.items);
       res.items.forEach((itemRef) => {
         setShowPanelProgress(true);
         // All the items under listRef.
         deleteObject(itemRef)
           .then(() => {
-            // File deleted successfully
-            // console.log("file deleted successfully", itemRef);
             setShowPanelProgress(false);
-            // setPanelBookFiles();
           })
-          .catch((error) => {
-            // console.log(error);
-            // Uh-oh, an error occurred!
-          });
+          .catch((error) => {});
       });
     });
   };
 
   const DeleteESOMARFileFromStorage = (storageRef) => {
-    // console.log("Deleting file");
     listAll(storageRef).then((res) => {
-      // console
-      // console.log(res.items);
       res.items.forEach((itemRef) => {
         setshowESOMARProgress(true);
         // All the items under listRef.
         deleteObject(itemRef)
           .then(() => {
-            // File deleted successfully
-            // console.log("file deleted successfully", itemRef);
             setshowESOMARProgress(false);
-            // setPanelBookFiles();
           })
-          .catch((error) => {
-            // console.log(error);
-            // Uh-oh, an error occurred!
-          });
+          .catch((error) => {});
       });
     });
   };
 
   const UploadPanelBookFiles = (id, panelfile) => {
     if (!panelfile) {
-      // console.log("panel book file not found");
       return;
     }
     //Empty file
     else {
-      // console.log("file found");
       let panelfilename = panelfile.name;
-      // If File extension is zip then only proceed
       const panelfileref = ref(
         storage,
         `Organisation/document-links/PanelBook/${id}/${panelfilename}`
@@ -202,15 +172,10 @@ const DocumentsLinks = () => {
           const progress = Math.round(
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100
           );
-          // console.log("PRogress bar is ", progress);
         },
-        (er) => {
-          // console.log("Error while uploading file ", er.message);
-        },
+        (er) => {},
         () => {
-          getDownloadURL(paneluploadTask.snapshot.ref).then((url) => {
-            // console.log(url);
-          });
+          getDownloadURL(paneluploadTask.snapshot.ref).then((url) => {});
         }
       );
     }
@@ -219,10 +184,8 @@ const DocumentsLinks = () => {
   //esomar file upload
   const UploadESOMARFiles = (id, esomarfile) => {
     if (!esomarfile) {
-      // console.log("esomar file not found");
       return;
     } else {
-      // console.log("esomar file found");
       let esomarfilename = esomarfile.name;
       const esomarfileref = ref(
         storage,
@@ -235,15 +198,10 @@ const DocumentsLinks = () => {
           const progress = Math.round(
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100
           );
-          // console.log("progress bar is: ", progress);
         },
-        (er) => {
-          // console.log("Error while uploading file=> ", er.message);
-        },
+        (er) => {},
         () => {
-          getDownloadURL(esomaruploadtask.snapshot.ref).then((url) => {
-            // console.log(url);
-          });
+          getDownloadURL(esomaruploadtask.snapshot.ref).then((url) => {});
         }
       );
     }
@@ -264,9 +222,6 @@ const DocumentsLinks = () => {
     });
   }
 
-  // console.log(panelFile);
-  // console.log(esomarFile);
-
   function ListPanelBookDocument() {
     listAll(panelBookRef).then((res) => {
       res.items.forEach((itemRef) => {
@@ -283,8 +238,9 @@ const DocumentsLinks = () => {
   }
 
   useEffect(() => {
-    // console.log(" in use effect", id);
-    checkID(id, sid);
+    checkID(id, sid).then(() => {
+      setLoading(false);
+    });
 
     //For Panel book
     ListPanelBookDocument();
@@ -293,9 +249,7 @@ const DocumentsLinks = () => {
 
   useEffect(() => {
     if (flag) {
-      // console.log("id found");
     } else {
-      // console.log("id not found");
     }
   }, [flag]);
 
@@ -316,17 +270,16 @@ const DocumentsLinks = () => {
       merge: true,
     })
       .then(() => {
-        // console.log("data updated successfully");
         history.push(`/sales-accounts/${id}/${sid}`);
       })
-      .catch((er) => {
-        // console.log("error", er);
-      });
+      .catch((er) => {});
   }
 
   return (
     <>
-      {documentInfo != undefined ? (
+      {loading ? (
+        <Loader />
+      ) : documentInfo ? (
         <div className={styles.onboarding}>
           <div className={styles.logo}>
             <img src={logo} alt="logo" />
@@ -360,7 +313,6 @@ const DocumentsLinks = () => {
                       Panel Book <small>(Please attach Or Provide Link)</small>{" "}
                       <span className={styles.required}>Required</span>
                     </label>
-                    {/* <FileUpload type={"panelbook"} id={id}/> */}
                     {/* File uploader  */}
                     {!panelFile &&
                     !documentInfo?.documents_info?.PanelBook_url ? (
@@ -371,7 +323,6 @@ const DocumentsLinks = () => {
 
                         <input
                           type="file"
-                          // id="fileIcon"
                           ref={panel_ref}
                           onChange={(e) => {
                             setDocumentInfo({
@@ -383,8 +334,6 @@ const DocumentsLinks = () => {
                             });
                             <a href="">{panelFile}</a>;
                           }}
-
-                          // <a href="">{panelFile?.name}</a>;
                         ></input>
                         {
                           <div className={styless.warning}>
@@ -583,7 +532,6 @@ const DocumentsLinks = () => {
                                 {!esomarFile ? (
                                   <></>
                                 ) : (
-                                  // <TiDelete size={20} hidden />
                                   <TiDelete
                                     size={20}
                                     onClick={() =>
@@ -695,11 +643,9 @@ const DocumentsLinks = () => {
                     </div>
                   </div>
                   <div className={styles.next}>
-                    {/* <Link to="/sales-accounts"> */}
                     <button className={styles.btnNext} type="submit">
                       NEXT
                     </button>
-                    {/* </Link> */}
                   </div>
                 </form>
               </div>
@@ -707,11 +653,8 @@ const DocumentsLinks = () => {
           </section>
         </div>
       ) : (
-        <>
-          <Error />
-        </>
+        <Error />
       )}
-      {/* <Header/> */}
     </>
   );
 };

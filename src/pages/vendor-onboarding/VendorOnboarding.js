@@ -40,6 +40,7 @@ import {
 } from "firebase/firestore";
 import { UploadFile } from "@mui/icons-material";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import Loader from "../loader/Loader";
 
 const helperCardData = [
   {
@@ -58,6 +59,7 @@ const VendorOnboarding = () => {
   const [vendor_entityInfo, setvendor_entityInfo] = useState();
   let [flag, setFlag] = useState(false);
   let [showProgress, setShowProgress] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   //tax certificate file upload:
   const [taxcert, settaxcert] = useState();
@@ -80,13 +82,6 @@ const VendorOnboarding = () => {
   let decode_id = hashids.decode(id);
   // console.log("decoded id=>", decode_id);
   let decode_sid = hashids.decode(sid);
-  // console.log("decoded sid=>", decode_sid);
-
-  // let decod = hashids.encode(id);
-  // console.log(decod);
-
-  // let decodeid = hashids.encode(sid);
-  // console.log(decodeid);
 
   //deleting file from storage:
   const deleteFileFromStorage = (storageRef) => {
@@ -97,12 +92,9 @@ const VendorOnboarding = () => {
         setShowProgress(true);
         deleteObject(itemRef)
           .then(() => {
-            // console.log("file deleted successfully", itemRef);
             setShowProgress(false);
           })
-          .catch((error) => {
-            // console.log(error);
-          });
+          .catch((error) => {});
       });
     });
   };
@@ -110,10 +102,8 @@ const VendorOnboarding = () => {
   //uploading tax certificate file:
   const UploadFiles = (id, file) => {
     if (!file) {
-      // console.log("tax id certificate file not found");
       return;
     } else {
-      // console.log("file found");
       let filename = file.name;
       const fileref = ref(
         storage,
@@ -126,15 +116,10 @@ const VendorOnboarding = () => {
           const progress = Math.round(
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100
           );
-          // console.log("progress bar is : ", progress);
         },
-        (er) => {
-          // console.log("error while uploading file: ", er.message);
-        },
+        (er) => {},
         () => {
-          getDownloadURL(uploadtask.snapshot.ref).then((url) => {
-            // console.log(url);
-          });
+          getDownloadURL(uploadtask.snapshot.ref).then((url) => {});
         }
       );
     }
@@ -161,20 +146,23 @@ const VendorOnboarding = () => {
     const Hashids = require("hashids/cjs");
     const hashids = new Hashids("client-vendor");
 
-    // console.log(decode_id[0]);
-    // console.log(decode_sid[0]);
-    const q = query(
-      collection(db, "supply_partners"),
-      where("id", "==", decode_id[0]),
-      where("sid", "==", decode_sid[0])
-    );
+    try {
+      const q = query(
+        collection(db, "supply_partners"),
+        where("id", "==", decode_id[0]),
+        where("sid", "==", decode_sid[0])
+      );
 
-    const querySnapshot = await getDocs(q);
-    if (querySnapshot.docs.length !== 0) {
-      setFlag(true);
-      setvendor_entityInfo(querySnapshot.docs[0].data());
-    } else {
-      setvendor_entityInfo();
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.docs.length !== 0) {
+        setFlag(true);
+        setvendor_entityInfo(querySnapshot.docs[0].data());
+      } else {
+        setvendor_entityInfo();
+      }
+    } catch (err) {
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -185,16 +173,13 @@ const VendorOnboarding = () => {
   );
 
   useEffect(() => {
-    // console.log("in main useEffect");
     checkID(id, sid);
     ListTaxFiles();
   }, []);
 
   useEffect(() => {
     if (flag) {
-      // console.log("id found");
     } else {
-      // console.log("id not found");
     }
   }, [flag]);
 
@@ -216,18 +201,16 @@ const VendorOnboarding = () => {
       }
     )
       .then(() => {
-        // console.log("data uploaded successfully!!!");
         history.push(`/vendor-business-info/${id}/${sid}`);
       })
-      .catch((er) => {
-        // console.log("Error", er);
-      });
+      .catch((er) => {});
   }
 
   return (
     <>
-      {/* <Header/> */}
-      {vendor_entityInfo != undefined ? (
+      {loading ? (
+        <Loader />
+      ) : vendor_entityInfo ? (
         <div className={styles.onboarding}>
           <div className={styles.logo}>
             <img src={logo} alt="logo" />
@@ -606,9 +589,7 @@ const VendorOnboarding = () => {
           </section>
         </div>
       ) : (
-        <>
-          <Error />
-        </>
+        <Error />
       )}
     </>
   );

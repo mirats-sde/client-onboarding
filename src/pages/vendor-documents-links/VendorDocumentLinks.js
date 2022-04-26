@@ -45,6 +45,7 @@ import {
 import { flexbox } from "@mui/system";
 import { DocumentScanner } from "@mui/icons-material";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import Loader from "../loader/Loader";
 
 const helperCardData = [
   {
@@ -63,6 +64,7 @@ const VendorDocumentsLinks = () => {
   let iconStylesDisabled = { color: "gray" };
   let [showPanelProgress, setShowPanelProgress] = useState(false);
   let [showESOMARProgress, setshowESOMARProgress] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   //panel upload:
   const [panelFile, setpanelFile] = useState();
@@ -73,9 +75,7 @@ const VendorDocumentsLinks = () => {
   const esomar_ref = useRef();
 
   //document
-  useEffect(() => {
-    // console.log(vendor_documentsInfo);
-  }, [vendor_documentsInfo]);
+  useEffect(() => {}, [vendor_documentsInfo]);
 
   //first id:
   const { id } = useParams();
@@ -87,12 +87,8 @@ const VendorDocumentsLinks = () => {
 
   const Hashids = require("hashids/cjs");
   const hashids = new Hashids("client-vendor");
-  // console.log(id);
-  // console.log(sid);
   let decode_id = hashids.decode(id);
-  // console.log("decoded id=>", decode_id);
   let decode_sid = hashids.decode(sid);
-  // console.log("decoded sid=>", decode_sid);
 
   //panel book reference:
   const panelBookRef = ref(
@@ -110,77 +106,59 @@ const VendorDocumentsLinks = () => {
   async function checkID(id, sid) {
     const Hashids = require("hashids/cjs");
     const hashids = new Hashids("client-vendor");
-    // console.log(decode_id[0]);
-    // console.log(decode_sid[0]);
-    const q = query(
-      collection(db, "supply_partners"),
-      where("id", "==", decode_id[0]),
-      where("sid", "==", decode_sid[0])
-    );
 
-    const querySnapshot = await getDocs(q);
-    if (querySnapshot.docs.length != 0) {
-      setFlag(true);
-      setvendor_documentsInfo(querySnapshot.docs[0].data());
-    } else {
-      setvendor_documentsInfo();
+    try {
+      const q = query(
+        collection(db, "supply_partners"),
+        where("id", "==", decode_id[0]),
+        where("sid", "==", decode_sid[0])
+      );
+
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.docs.length != 0) {
+        setFlag(true);
+        setvendor_documentsInfo(querySnapshot.docs[0].data());
+      } else {
+        setvendor_documentsInfo();
+      }
+    } catch (Err) {
+    } finally {
+      setLoading(false);
     }
   }
 
   const DeletePanelFileFromStorage = (storageRef) => {
-    // console.log("Deleting file");
     listAll(storageRef).then((res) => {
-      // console
-      // console.log(res.items);
       res.items.forEach((itemRef) => {
         setShowPanelProgress(true);
         // All the items under listRef.
         deleteObject(itemRef)
           .then(() => {
-            // File deleted successfully
-            // console.log("file deleted successfully", itemRef);
             setShowPanelProgress(false);
-            // setPanelBookFiles();
           })
-          .catch((error) => {
-            // console.log(error);
-            // Uh-oh, an error occurred!
-          });
+          .catch((error) => {});
       });
     });
   };
 
   const DeleteESOMARFileFromStorage = (storageRef) => {
-    // console.log("Deleting file");
     listAll(storageRef).then((res) => {
-      // console
-      // console.log(res.items);
       res.items.forEach((itemRef) => {
         setshowESOMARProgress(true);
         // All the items under listRef.
         deleteObject(itemRef)
           .then(() => {
-            // File deleted successfully
-            // console.log("file deleted successfully", itemRef);
             setshowESOMARProgress(false);
-            // setPanelBookFiles();
           })
-          .catch((error) => {
-            // console.log(error);
-            // Uh-oh, an error occurred!
-          });
+          .catch((error) => {});
       });
     });
   };
 
   const UploadPanelBookFiles = (id, panelfile) => {
     if (!panelfile) {
-      // console.log("panel book file not found");
       return;
-    }
-    //Empty file
-    else {
-      // console.log("file found");
+    } else {
       let panelfilename = panelfile.name;
       // If File extension is zip then only proceed
       const panelfileref = ref(
@@ -195,15 +173,10 @@ const VendorDocumentsLinks = () => {
           const progress = Math.round(
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100
           );
-          // console.log("PRogress bar is ", progress);
         },
-        (er) => {
-          // console.log("Error while uploading file ", er.message);
-        },
+        (er) => {},
         () => {
-          getDownloadURL(paneluploadTask.snapshot.ref).then((url) => {
-            // console.log(url);
-          });
+          getDownloadURL(paneluploadTask.snapshot.ref).then((url) => {});
         }
       );
     }
@@ -257,9 +230,6 @@ const VendorDocumentsLinks = () => {
     });
   }
 
-  // console.log(panelFile);
-  // console.log(esomarFile);
-
   function ListPanelBookDocument() {
     listAll(panelBookRef).then((res) => {
       res.items.forEach((itemRef) => {
@@ -276,7 +246,6 @@ const VendorDocumentsLinks = () => {
   }
 
   useEffect(() => {
-    // console.log(" in use effect", id);
     checkID(id, sid);
 
     //For Panel book
@@ -286,9 +255,7 @@ const VendorDocumentsLinks = () => {
 
   useEffect(() => {
     if (flag) {
-      // console.log("id found");
     } else {
-      // console.log("id not found");
     }
   }, [flag]);
 
@@ -313,18 +280,17 @@ const VendorDocumentsLinks = () => {
       }
     )
       .then(() => {
-        // console.log("data updated successfully");
         history.push(`/vendor-sales-accounts/${id}/${sid}`);
       })
-      .catch((er) => {
-        // console.log("error", er);
-      });
+      .catch((er) => {});
   }
 
   return (
     <>
       {/* <Header/> */}
-      {vendor_documentsInfo != undefined ? (
+      {loading ? (
+        <Loader />
+      ) : vendor_documentsInfo ? (
         <div className={styles.onboarding}>
           <div className={styles.logo}>
             <img src={logo} alt="logo" />
@@ -707,10 +673,15 @@ const VendorDocumentsLinks = () => {
           </section>
         </div>
       ) : (
+        <Error />
+      )}
+      {/* {vendor_documentsInfo != undefined ? (
+       
+      ) : (
         <>
           <Error />
         </>
-      )}
+      )} */}
     </>
   );
 };

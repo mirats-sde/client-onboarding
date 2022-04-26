@@ -18,7 +18,7 @@ import { Timestamp } from "firebase/firestore";
 // import { MdOutlineDeleteOutline } from "react-icons/md";
 import { TiDelete } from "react-icons/ti";
 import Error from "../../components/error/Error";
-
+import Loader from "../loader/Loader";
 import Hashids from "hashids";
 import {
   getDownloadURL,
@@ -62,15 +62,14 @@ const ClientOnboarding = () => {
   let iconStyles = { color: "#7B61FF" };
   let iconStylesDisabled = { color: "gray" };
   let [showProgress, setShowProgress] = useState(false);
+  let [loading, setLoading] = useState(true);
 
   const [entityInfo, setEntityInfo] = useState();
 
   const [startdate, setstartdate] = useState();
   const tax_id_certi_Ref = useRef();
 
-  useEffect(() => {
-    // console.log(entityInfo);
-  }, [entityInfo]);
+  useEffect(() => {}, [entityInfo]);
 
   //tax certificate file upload:
   const [taxcert, settaxcert] = useState();
@@ -82,44 +81,37 @@ const ClientOnboarding = () => {
   //second id
   const { sid } = useParams();
 
-  let [flag, setFlag] = useState(false);
+  let [flag, setFlag] = useState();
 
   const Hashids = require("hashids/cjs");
   const hashids = new Hashids("client-vendor");
   let decode_id = hashids.decode(id);
-  // console.log("decoded id=> ", decode_id);
+
   let decode_sid = hashids.decode(sid);
-  // console.log("decoded sid=> ", decode_sid);
-
-  // let decod = hashids.encode(id);
-  // console.log(decod);
-
-  // let decodeid = hashids.encode(sid);
-  // console.log(decodeid);
 
   //check whether first id exists or not
   async function checkID(id, sid) {
     const Hashids = require("hashids/cjs");
     const hashids = new Hashids("client-vendor");
 
-    // console.log(decode_id[0]);
-    // console.log(decode_sid[0]);
-    const q = query(
-      collection(db, "Organisation"),
-      where("id", "==", decode_id[0]),
-      where("sid", "==", decode_sid[0])
-    );
-
-    const querySnapshot = await getDocs(q);
-    if (querySnapshot.docs.length !== 0) {
-      // console.log("Entered this condition")
-      setFlag(true);
-      setEntityInfo(querySnapshot.docs[0].data());
-    } else {
-      setEntityInfo();
+    try {
+      const q = query(
+        collection(db, "Organisation"),
+        where("id", "==", decode_id[0]),
+        where("sid", "==", decode_sid[0])
+      );
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.docs.length !== 0) {
+        setFlag(true);
+        setEntityInfo(querySnapshot.docs[0].data());
+      } else {
+        setEntityInfo();
+      }
+    } catch (err) {
+    } finally {
+      setLoading(false);
     }
   }
-  // console.log(entityInfo);
 
   //tax certificate reference:
   const taxcertref = ref(storage, `Organisation/legal-entity/${decode_id[0]}`);
@@ -133,13 +125,9 @@ const ClientOnboarding = () => {
         setShowProgress(true);
         deleteObject(itemRef)
           .then(() => {
-            //file deleted successfullly
-            // console.log("file deleted successfully", itemRef);
             setShowProgress(false);
           })
-          .catch((error) => {
-            // console.log(error);
-          });
+          .catch((error) => {});
       });
     });
   };
@@ -147,10 +135,8 @@ const ClientOnboarding = () => {
   //uploading tax certificate file
   const UploadFiles = (id, file) => {
     if (!file) {
-      // console.log("tax certificate file not found!");
       return;
     } else {
-      // console.log("file found");
       let filename = file.name;
       const fileref = ref(
         storage,
@@ -163,15 +149,10 @@ const ClientOnboarding = () => {
           const progress = Math.round(
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100
           );
-          // console.log("progress bar is: ", progress);
         },
-        (er) => {
-          // console.log("error while uploading file", er.message);
-        },
+        (er) => {},
         () => {
-          getDownloadURL(uploadtask.snapshot.ref).then((url) => {
-            // console.log(url);
-          });
+          getDownloadURL(uploadtask.snapshot.ref).then((url) => {});
         }
       );
     }
@@ -195,16 +176,19 @@ const ClientOnboarding = () => {
 
   useEffect(() => {
     // console.log("in useeffect", id);
-    checkID(id, sid);
-    // const storageRef = ref(storage, `/legal_entity/${decode_id[0]}`);
+
     ListTaxFiles();
+  }, [id, sid]);
+
+  useEffect(() => {
+    checkID(id, sid).then(() => {
+      setLoading(false);
+    });
   }, []);
 
   useEffect(() => {
     if (flag) {
-      // console.log("id found");
     } else {
-      // console.log("id not found");
     }
   }, [flag]);
 
@@ -219,21 +203,18 @@ const ClientOnboarding = () => {
       merge: true,
     })
       .then(() => {
-        // console.log("data uploaded successfully");
         history.push(`/business-info/${id}/${sid}`);
       })
-      .catch((er) => {
-        // console.log("Error", er);
-      });
+      .catch((er) => {});
   }
 
-  useEffect(() => {
-    // console.log(entityInfo?.legal_entity?.start_date);
-  }, [entityInfo?.legal_entity?.start_date]);
+  useEffect(() => {}, [entityInfo?.legal_entity?.start_date]);
 
   return (
     <>
-      {entityInfo != undefined ? (
+      {loading ? (
+        <Loader />
+      ) : entityInfo ? (
         <div className={styles.onboarding}>
           <div className={styles.logo}>
             <img src={logo} alt="logo" />
@@ -612,9 +593,7 @@ const ClientOnboarding = () => {
           </section>
         </div>
       ) : (
-        <>
-          <Error />
-        </>
+        <Error />
       )}
     </>
   );

@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { collection, getDoc, getDocs, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import Error from "../../components/error/Error";
+import Loader from "../loader/Loader";
 
 const left = [
   {
@@ -34,6 +35,7 @@ const left = [
 
 const VendorQualityChecks = () => {
   const [regattributes, setRegattributes] = useState();
+  const [loading, setLoading] = useState(true);
 
   const { questionType } = useParams();
   const { id } = useParams();
@@ -55,24 +57,32 @@ const VendorQualityChecks = () => {
     // console.log("checking ids");
     const Hashids = require("hashids/cjs");
     const hashids = new Hashids("client-vendor");
-    const q = query(
-      collection(db, "supply_partners"),
-      where("id", "==", decode_id[0]),
-      where("sid", "==", decode_sid[0])
-    );
-    const querysnapshot = await getDocs(q);
-    if (querysnapshot.docs.length != 0) {
-      setFlag(true);
-      setRegattributes(querysnapshot.docs[0].data());
-    } else {
-      setRegattributes();
+
+    try {
+      const q = query(
+        collection(db, "supply_partners"),
+        where("id", "==", decode_id[0]),
+        where("sid", "==", decode_sid[0])
+      );
+      const querysnapshot = await getDocs(q);
+      if (querysnapshot.docs.length != 0) {
+        setFlag(true);
+        setRegattributes(querysnapshot.docs[0].data());
+      } else {
+        setRegattributes();
+      }
+    } catch (err) {
+    } finally {
+      setLoading(false);
     }
   }
 
   // console.log(regattributes);
 
   useEffect(() => {
-    checkID(id, sid);
+    checkID(id, sid).then(() => {
+      setLoading(false);
+    });
   }, []);
 
   //registration attributes:
@@ -243,7 +253,9 @@ const VendorQualityChecks = () => {
 
   return (
     <>
-      {regattributes !== undefined ? (
+      {loading ? (
+        <Loader />
+      ) : regattributes ? (
         <div className={styles.vendor_onboarding}>
           <div className={styles.left_pages}>
             {left.map((l) => {
@@ -344,9 +356,7 @@ const VendorQualityChecks = () => {
           {/* buttons */}
         </div>
       ) : (
-        <>
-          <Error />
-        </>
+        <Error />
       )}
     </>
   );
